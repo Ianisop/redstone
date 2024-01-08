@@ -141,8 +141,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         //D2::Circle(Vec2(120), 20, { 0,1,0,1 });
         //D2::Circle(Vec2(150), 20, { 0,0,0,1 }, 12);
        
-        D3::Plane(Transform(Vec3::forward + -Vec3::up * 0.3f,0, 1, {1,1,1,1}, Vec3(0,0,0));
-        D3::Cube(Transform(Vec3::forward * 3, 0, 1 , { 0.92, 0.26, .27, 1}, Vec3(0,0,0));
+        D3::Plane(Transform(Vec3::forward,0,1,Vec3(0,0,0)), Color(1,1,1,1));
+        D3::Cube(Transform(Vec3::forward, 0, 1, Vec3(0, 0, 0)), Color(1, 1, 1, 1));
         D3::Line(Vec3::forward * 3 + -Vec3::right, Vec3::forward * 2 + -Vec3::right * 1.5, { 0.345, 0.396, 0.949, 1});
         D3::Arrow(Vec3::forward * 1.5, Vec3(.1), { 0.996, 0.906, 0.361, 1 });
 
