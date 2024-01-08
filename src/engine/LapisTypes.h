@@ -128,11 +128,15 @@ namespace Lapis
 		{
 			Vec3 scale;
 		};
+		union
+		{
+			Vec3 dir;
+		};
 		Transform() :
-			pos(0), rot(0), scale(1)
+			pos(0), rot(0), scale(1), dir(0)
 		{}
-		Transform(Vec3 pos, Vec3 rot, Vec3 scale) :
-			pos(pos), rot(rot), scale(scale)
+		Transform(Vec3 pos, Vec3 rot, Vec3 scale, Vec3 dir) :
+			pos(pos), rot(rot), scale(scale), dir(dir)
 		{}
 	};
 

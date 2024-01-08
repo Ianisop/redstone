@@ -314,7 +314,7 @@ namespace Lapis
             auto scaleView = Helpers::XMMatrixScaling(mainCamera.scale);
             view = view * translateView * rotateView;
 
-            auto projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, SCREEN_WIDTH / (FLOAT)SCREEN_HEIGHT, 0.01f, 100.0f);
+            auto projection = DirectX::XMMatrixPerspectiveFovLH(FOV, SCREEN_WIDTH / (FLOAT)SCREEN_HEIGHT, 0.01f, 100.0f);
 
             gcb.Screen = screen;
             gcb.World = DirectX::XMMatrixTranspose(world);
