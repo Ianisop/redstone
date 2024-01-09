@@ -8,6 +8,7 @@
 
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
+#include <cmath>
 
 // include chrono for time
 #include <chrono>
@@ -37,6 +38,8 @@
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+
 
 // entry point
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
@@ -116,14 +119,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             fps = 1000/(1000 * fpsTimeTotal / fpsSamples);
         }
         //std::cout << std::format("delta:   {:.8f}s\nelapsed: {:.4f}s\navg fps: {}\n", Lapis::deltaTime, Lapis::elapsedTime, fps);
+        mainCamera.dir = mainCamera.CalculateDirectionFromRotation(mainCamera.rot);
 
-        if (GetAsyncKeyState('A')) mainCamera.pos += Vec3::right * deltaTime;
-        if (GetAsyncKeyState('D')) mainCamera.pos -= Vec3::right * deltaTime;
-        if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * deltaTime;
-        if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * deltaTime;
-        if (GetAsyncKeyState('W')) mainCamera.pos -= Vec3::forward * deltaTime;
-        if (GetAsyncKeyState('S')) mainCamera.pos += Vec3::forward * deltaTime;
+       std::cout << std::format("RIGHT {}x{}y{}z, FORWARD {}x{}y{}z \n", mainCamera.dir.x, mainCamera.dir.y, mainCamera.dir.z, mainCamera.dir.x, mainCamera.dir.y, mainCamera.dir.z);
 
+        float movementSpeed = 1.0f;
+
+
+        if (GetAsyncKeyState('A')) mainCamera.pos -= mainCamera.dir.x * movementSpeed* deltaTime;
+        if (GetAsyncKeyState('D')) mainCamera.pos +=  mainCamera.dir.x * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('W')) mainCamera.pos += mainCamera.dir.z * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('S')) mainCamera.pos -= mainCamera.dir.z * movementSpeed * deltaTime;
+
+        
 
         Lapis::NewFrame();
 
@@ -143,7 +153,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
        
         D3::Plane(Transform(Vec3::forward,0,1,Vec3(0,0,0)), Color(1,1,1,1));
         D3::Cube(Transform(Vec3::forward, 0, 1, Vec3(0, 0, 0)), Color(1, 1, 1, 1));
-        D3::Line(Vec3::forward * 3 + -Vec3::right, Vec3::forward * 2 + -Vec3::right * 1.5, { 0.345, 0.396, 0.949, 1});
+        D3::Line(mainCamera.pos.x,mainCamera.pos.x + 100, Color(255,0,0,1)); //x axis 
+        D3::Line(mainCamera.pos.y,mainCamera.pos.y + 100, Color(0,255,0,1)); //y axis 
+        D3::Line(mainCamera.pos.z,mainCamera.pos.z + 100, Color(0,0,255,1)); //z axis 
         D3::Arrow(Vec3::forward * 1.5, Vec3(.1), { 0.996, 0.906, 0.361, 1 });
 
         Lapis::RenderFrame();
@@ -180,10 +192,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             xRot += xPos - xPosOld;
             yRot += yPos - yPosOld;
+            xRot %= 360;
             //std::cout << xPos - xPosOld << "\n";
             yRot = std::clamp(yRot, -90, 90);
         
-            std::cout << std::format("{} x, {} y \n", xRot, yRot);
+            
+                
+            //std::cout << std::format("{} x, {} y \n", xRot, yRot);
             mainCamera.rot = Vec3(yRot, xRot, 0);
 
             xPosOld = xPos;
@@ -192,8 +207,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             break;
         }
-
-
 
     }
     // Handle any messages the switch statement didn't
