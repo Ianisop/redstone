@@ -22,10 +22,10 @@ namespace Lapis::Backend
 
     bool standaloneApplication = false;
 
-    mat4x4 matrix_screen;
-    mat4x4 matrix_world;
-    mat4x4 matrix_view;
-    mat4x4 matrix_projection;
+    mat4x4 matrix_screen = mat4x4(DirectX::XMMatrixIdentity());
+    mat4x4 matrix_world = mat4x4(DirectX::XMMatrixIdentity());
+    mat4x4 matrix_view = mat4x4(DirectX::XMMatrixIdentity());
+    mat4x4 matrix_projection = mat4x4(DirectX::XMMatrixIdentity());
 
     HWND hwnd;
     Vec4 clientRect = {0,0,800,600};
@@ -191,19 +191,9 @@ namespace Lapis::Backend
             device->CreateDepthStencilState(&desc, &depthStencilState);
         }
 
-        matrix_world = DirectX::XMMatrixIdentity();
-        DirectX::XMVECTOR Eye = Helpers::XMVectorSet(0);
-        DirectX::XMVECTOR At = Helpers::XMVectorSet(Vec3::forward);
-        DirectX::XMVECTOR Up = Helpers::XMVectorSet(Vec3::up);
-        matrix_view = DirectX::XMMatrixLookAtLH(Eye, At, Up);
-        matrix_projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, clientRect.width / clientRect.height, 0.01f, 10000.0f);
-
-
-        gcb.World = DirectX::XMMatrixTranspose(matrix_world);
-        gcb.View = DirectX::XMMatrixTranspose(matrix_view);
-        gcb.Projection = DirectX::XMMatrixTranspose(matrix_projection);
-            
+        UpdateGlobalConstantBuffer();
     }
+
     void SetupD3D11State()
     {
         deviceContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
@@ -367,7 +357,7 @@ namespace Lapis::Backend
             VBufferSize = VertexVectorCapacity;
         }
             
-        RemapSubResource(vertexBuffer, LapisVertexVector.data(), sizeof(Vertex) * LapisVertexVector.size());
+        MapResource(vertexBuffer, LapisVertexVector.data(), sizeof(Vertex) * LapisVertexVector.size());
 
         // DX11 State Structure
         struct BACKUP_DX11_STATE
@@ -510,11 +500,20 @@ namespace Lapis::Backend
         };
         matrix_screen = m;
 
+        if (standaloneApplication) {
+            matrix_world = DirectX::XMMatrixIdentity();
+            DirectX::XMVECTOR Eye = Helpers::XMVectorSet(0);
+            DirectX::XMVECTOR At = Helpers::XMVectorSet(Vec3::forward);
+            DirectX::XMVECTOR Up = Helpers::XMVectorSet(Vec3::up);
+            matrix_view = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+            matrix_projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, clientRect.width / clientRect.height, 0.01f, 10000.0f);
+        }
+
         gcb.Screen = matrix_screen;
         gcb.World = DirectX::XMMatrixTranspose(matrix_world);
         gcb.View = DirectX::XMMatrixTranspose(matrix_view);
         gcb.Projection = DirectX::XMMatrixTranspose(matrix_projection);
-        RemapSubResource(constantBuffer, &gcb, sizeof(gcb));
+        MapResource(constantBuffer, &gcb, sizeof(gcb));
     }
     void DrawCommand(InternalLapisCommand internalLapisCommand)
     {
@@ -526,7 +525,7 @@ namespace Lapis::Backend
         model = model * scaleModel * rotateModel * translateModel;
         gcb.Model = DirectX::XMMatrixTranspose(model);
 
-        RemapSubResource(constantBuffer, &gcb, sizeof(gcb));
+        MapResource(constantBuffer, &gcb, sizeof(gcb));
 
         auto& material = internalLapisCommand.material;
 
@@ -572,7 +571,7 @@ namespace Lapis::Backend
 
 #undef CREATE_DEFAULT_SHADER
     }
-    void RemapSubResource(ID3D11Resource* resource, void* data, size_t size)
+    void MapResource(ID3D11Resource* resource, void* data, size_t size)
     {
         D3D11_MAPPED_SUBRESOURCE ms;
         deviceContext->Map(resource, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);

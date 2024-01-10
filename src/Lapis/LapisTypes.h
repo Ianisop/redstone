@@ -85,7 +85,17 @@ namespace Lapis
 
 	struct Vec3
 	{
-		float x, y, z;
+		union {
+			struct {
+				float x, y, z;
+			};
+			struct {
+				float pitch, yaw, roll;
+			};
+			struct {
+				float r, g, b;
+			};
+		};
 
 		Vec3 operator-() const;
 		Vec3 operator+(const Vec3& other) const;
@@ -245,6 +255,9 @@ namespace Lapis
 			r{ r0, r1, r2, r3 }
 		{}
 
+		mat4x4(DirectX::XMMATRIX mat) :
+			r{ mat.r[0], mat.r[0], mat.r[0], mat.r[0] }
+		{}
 		mat4x4(DirectX::XMMATRIX& mat) :
 			r{ mat.r[0], mat.r[0], mat.r[0], mat.r[0] }
 		{}
