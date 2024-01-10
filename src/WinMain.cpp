@@ -15,7 +15,7 @@
 
 // include iostream for printing
 #include <iostream>
-
+#include "Game.h"
 // include DirectX headers
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -126,7 +126,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
         if (GetAsyncKeyState('W')) mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
         if (GetAsyncKeyState('S')) mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('L')) ShowCursor(!CURSOR_SHOWING);
+
 
 
         static int checkerboardSize = 25;
@@ -140,9 +140,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 Draw::D3::Plane(Transform(Vec3(i - checkerboardSize / 2, -2, j - checkerboardSize / 2), 0, 1), col);
             }
         }
-        RECT rect{} ;
 
-        ClipCursor(&rect);
+
+        Game::Run();
+
+
+
+
         // Run Lapis Frame
         {
             using namespace Lapis;
@@ -189,7 +193,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         
 
-        std::cout << std::format("{} x, {} y \n", xRot, yRot);
+        //std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
 
         xPosOld = xPos;
