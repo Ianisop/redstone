@@ -44,10 +44,7 @@ namespace Game
 	/// <returns>True</returns>
 	bool IsBoxColliding(Vec3 a, Vec3 b)
 	{
-		if (a.x - b.x < 0 && a.x + b.x > 0 &&
-			a.y - b.y < 0 && a.y + b.y > 0 &&
-			a.z - b.z < 0 && a.z + b.z > 0)
-		{
+		if()
 			// Collide
 			return true;
 		}
