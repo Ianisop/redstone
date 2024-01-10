@@ -120,13 +120,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
         
 
-        if (GetAsyncKeyState('A')) mainCamera.pos += mainCamera.pos.x * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('D')) mainCamera.pos -= mainCamera.pos.x * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('A')) mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('D')) mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
         if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * movementSpeed * deltaTime;
         if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
         if (GetAsyncKeyState('W')) mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
         if (GetAsyncKeyState('S')) mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('L')) ShowCursor(!CURSOR_SHOWING);;
+        if (GetAsyncKeyState('L')) ShowCursor(!CURSOR_SHOWING);
 
 
         static int checkerboardSize = 25;
@@ -140,12 +140,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 Draw::D3::Plane(Transform(Vec3(i - checkerboardSize / 2, -2, j - checkerboardSize / 2), 0, 1), col);
             }
         }
+        RECT rect{} ;
+
+        ClipCursor(&rect);
         // Run Lapis Frame
         {
             using namespace Lapis;
             NewFrame();
-
-            Draw::D2::Circle(250, 100, "0000ff");
 
 
             RenderFrame();
@@ -180,12 +181,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
 
-        xRot += xPos - xPosOld;
-        yRot += yPos - yPosOld;
+        xRot += (xPos - xPosOld) * deltaTime * 30;
+        yRot += (yPos - yPosOld) * deltaTime * 30;
         
         //std::cout << xPos - xPosOld << "\n";
         yRot = std::clamp(yRot, -90, 90);
 
+        
 
         std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
