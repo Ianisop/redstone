@@ -4,11 +4,9 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <wingdi.h>
-#include <algorithm>
 
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
-#include <cmath>
 
 // include chrono for time
 #include <chrono>
@@ -28,18 +26,15 @@
 #pragma comment (lib, "d3dcompiler.lib")
 
 // include Lapis headers
-#include "engine/LapisEngine.h"
-#include "engine/GlobalDefines.h"
-#include "engine/Helpers.h"
+#include "Lapis/Engine.h"
+#include "Lapis/Helpers.h"
 
 // include Utility headers
 #include "utils/hsl-to-rgb.hpp"
-#include "Game.h"
+
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-
 
 // entry point
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
@@ -89,6 +84,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     //MARGINS margins = { -1 }; ;
     //DwmExtendFrameIntoClientArea(hwnd, &margins);
 
+  
+
+    std::cout << "created device and swapchain\n";
+
+
 #ifdef _DEBUG
     AllocConsole();
     SetConsoleTitleW(L"DEBUG OUTPUT");
@@ -100,43 +100,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     printf("initting lapis\n");
     Lapis::InitLapis(hwnd);
 
+
     float FPS_CAP = 60;
     bool LIMIT_FPS = false;
     MSG msg{};
-    while (true && !GetAsyncKeyState(VK_DELETE))
+    while (true && !GetAsyncKeyState(VK_ESCAPE))
     {
-        using namespace Lapis;
-        using namespace Lapis::Draw;
-
-        static float fpsTimeTotal = 0;
-        static int fpsSamples = 0;
-        static float fps = 0;
-        if (GetAsyncKeyState('M')) {
-            fpsTimeTotal += Lapis::deltaTime;
-            fpsSamples++;
-        }
-        if (fpsSamples > 0) {
-            fps = 1000/(1000 * fpsTimeTotal / fpsSamples);
-        }
-        //std::cout << std::format("delta:   {:.8f}s\nelapsed: {:.4f}s\navg fps: {}\n", Lapis::deltaTime, Lapis::elapsedTime, fps);
-        mainCamera.dir = mainCamera.CalculateDirectionFromRotation(mainCamera.rot);
-
-       std::cout << std::format("RIGHT {}x{}y{}z, FORWARD {}x{}y{}z \n", mainCamera.dir.x, mainCamera.dir.y, mainCamera.dir.z, mainCamera.dir.x, mainCamera.dir.y, mainCamera.dir.z);
-
-        float movementSpeed = 1.0f;
-
-
-        if (GetAsyncKeyState('A')) mainCamera.pos -= mainCamera.dir.x * movementSpeed* deltaTime;
-        if (GetAsyncKeyState('D')) mainCamera.pos +=  mainCamera.dir.x * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('W')) mainCamera.pos += mainCamera.dir.z * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('S')) mainCamera.pos -= mainCamera.dir.z * movementSpeed * deltaTime;
-
-        
-
-        Lapis::NewFrame();
-
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -145,21 +114,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 break;
         }
 
-        //D2::Line(Vec2(10, 10), Vec2(50, 50), {1,1,1,1});
-        //D2::Rect(Vec4(100,10,110,60), {1,0,0,1});
-        //D2::Rect(Vec2(10,100), Vec2(50,10), {0,0,1,1});
-        //D2::Circle(Vec2(120), 20, { 0,1,0,1 });
-        //D2::Circle(Vec2(150), 20, { 0,0,0,1 }, 12);
-       
-        D3::Plane(Transform(Vec3::forward,0,1,Vec3(0,0,0)), Color(1,1,1,1));
-        D3::Cube(Transform(Vec3::forward, 0, 1, Vec3(0, 0, 0)), Color(1, 1, 1, 1));
-        D3::Line(mainCamera.pos.x,mainCamera.pos.x + 100, Color(255,0,0,1)); //x axis 
-        D3::Line(mainCamera.pos.y,mainCamera.pos.y + 100, Color(0,255,0,1)); //y axis 
-        D3::Line(mainCamera.pos.z,mainCamera.pos.z + 100, Color(0,0,255,1)); //z axis 
-        D3::Arrow(Vec3::forward * 1.5, Vec3(.1), { 0.996, 0.906, 0.361, 1 });
+        // Run Lapis Frame
+        {
+            using namespace Lapis;
+            NewFrame();
 
-        Lapis::RenderFrame();
-        Lapis::FlushFrame();
+            Draw::D2::Circle(250, 100, "0000ff");
+
+
+            RenderFrame();
+            FlushFrame();
+        }
     }
 
     std::cout << "Cleaning up";
@@ -169,46 +134,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 }
 
 // this is the main message handler for the program
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    // sort through and find what code to run for the message given
-    switch (message) {
-        // this message is read when the window is closed
+    Lapis::WndProcHandler(hwnd, msg, wParam, lParam);
+
+    switch (msg) {
     case WM_DESTROY:
-        // close the application entirely
         PostQuitMessage(0);
         return 0;
         break;
-    
-    case WM_MOUSEMOVE:
-        {
-            using namespace Lapis;
-
-            static int xRot{}, yRot{};
-            static int xPosOld{ GET_X_LPARAM(lParam) }, yPosOld{ GET_Y_LPARAM(lParam) };
-
-            int xPos = GET_X_LPARAM(lParam);
-            int yPos = GET_Y_LPARAM(lParam);
-
-            xRot += xPos - xPosOld;
-            yRot += yPos - yPosOld;
-            xRot %= 360;
-            //std::cout << xPos - xPosOld << "\n";
-            yRot = std::clamp(yRot, -90, 90);
-        
-            
-                
-            //std::cout << std::format("{} x, {} y \n", xRot, yRot);
-            mainCamera.rot = Vec3(yRot, xRot, 0);
-
-            xPosOld = xPos;
-            yPosOld = yPos;
-            ShowCursor(false);
-
-            break;
-        }
-
     }
-    // Handle any messages the switch statement didn't
-    return DefWindowProc(hWnd, message, wParam, lParam);
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 }
