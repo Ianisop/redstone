@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <wingdi.h>
+#include <algorithm>
 
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
@@ -104,8 +105,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     float FPS_CAP = 60;
     bool LIMIT_FPS = false;
     MSG msg{};
+   
     while (true && !GetAsyncKeyState(VK_ESCAPE))
     {
+        using namespace Lapis;
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -113,7 +116,30 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             if (msg.message == WM_QUIT)
                 break;
         }
+        float movementSpeed = 1;
 
+        
+
+        if (GetAsyncKeyState('A')) mainCamera.pos -= mainCamera.pos.x * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('D')) mainCamera.pos += mainCamera.pos.x * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('W')) mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('S')) mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
+        if (GetAsyncKeyState('L')) ShowCursor(!CURSOR_SHOWING);;
+
+
+        static int checkerboardSize = 25;
+        Color col;
+        for (int i = 0; i < checkerboardSize; i++) {
+            for (int j = 0; j < checkerboardSize; j++) {
+                if (((i % 2) + j) % 2 == 1)
+                    col  = "ffffff";
+                else
+                    col = "000000";
+                Draw::D3::Plane(Transform(Vec3(i - checkerboardSize / 2, -2, j - checkerboardSize / 2), 0, 1), col);
+            }
+        }
         // Run Lapis Frame
         {
             using namespace Lapis;
@@ -143,6 +169,31 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 0;
         break;
+
+    case WM_MOUSEMOVE:
+    
+        using namespace Lapis;
+
+        static int xRot{}, yRot{};
+        static int xPosOld{ GET_X_LPARAM(lParam) }, yPosOld{ GET_Y_LPARAM(lParam) };
+
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+
+        xRot += xPos - xPosOld;
+        yRot += yPos - yPosOld;
+        //std::cout << xPos - xPosOld << "\n";
+        yRot = std::clamp(yRot, -90, 90);
+
+        //std::cout << std::format("{} x, {} y \n", xRot, yRot);
+        mainCamera.rot = Vec3(yRot, xRot, 0);
+
+        xPosOld = xPos;
+        yPosOld = yPos;
+        
+
+        break;
     }
+
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }

@@ -211,6 +211,8 @@ namespace Lapis
 		{
 			Vec3 scale;
 		};
+		Vec3 Forward();
+			
 		Transform() :
 			pos(0), rot(0), scale(1)
 		{}

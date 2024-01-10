@@ -1,5 +1,5 @@
 #include "LapisTypes.h"
-
+#include "Helpers.h"
 namespace Lapis
 {
 	////////////////////// Color
@@ -223,4 +223,21 @@ namespace Lapis
 	}
 
 	mat4x4 const mat4x4::Identity({ 1, 0, 0, 0 }, { 0,1,0,0 }, { 0,0,1,0 }, { 0,0,0,1 });
+
+	//// transform
+	Vec3 Transform::Forward()
+	{
+		float x, y, z{};
+
+		float yaw = this->rot.y * DEG2RAD;
+		float pitch = this->rot.z * DEG2RAD;
+
+		x = cos(yaw) * cos(pitch);
+		y = sin(pitch);
+		z = sin(yaw) * cos(pitch);
+
+
+
+		return Vec3(x,y,z);
+	}
 }
