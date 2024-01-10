@@ -182,10 +182,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         xRot += xPos - xPosOld;
         yRot += yPos - yPosOld;
+        
         //std::cout << xPos - xPosOld << "\n";
         yRot = std::clamp(yRot, -90, 90);
 
-        //std::cout << std::format("{} x, {} y \n", xRot, yRot);
+
+        std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
 
         xPosOld = xPos;
