@@ -158,6 +158,11 @@ namespace Lapis
 		return sqrt(powf((b.x - a.x), 2)+powf((b.y - a.y),2)+powf((b.z-a.z),2));
 	}
 
+	float Vec3::Magnitude(Vec3 a)
+	{
+		return sqrtf(powf(a.x,2)+powf(a.y,2)+powf(a.z,2));
+	}
+
 	////////////////////// Vec4
 
 	Vec4 Lapis::Vec4::operator+(const Vec4& other) const

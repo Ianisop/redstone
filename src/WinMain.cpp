@@ -118,14 +118,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         }
         float movementSpeed = 1;
 
-        
-
-        if (GetAsyncKeyState('A')) mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('D')) mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('Q')) mainCamera.pos += Vec3::up * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('E')) mainCamera.pos -= Vec3::up * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('W')) mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
-        if (GetAsyncKeyState('S')) mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
+       
 
 
 

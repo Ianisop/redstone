@@ -124,7 +124,7 @@ namespace Lapis
 		{}
 
 		static float Distance(Vec3 a, Vec3 b);
-
+		static float Magnitude(Vec3 a);
 
 		static const Vec3 up;
 		static const Vec3 right;
