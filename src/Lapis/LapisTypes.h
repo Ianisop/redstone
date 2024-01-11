@@ -123,6 +123,9 @@ namespace Lapis
 			x(v2.x), y(v2.y), z(0)
 		{}
 
+		static float Distance(Vec3 a, Vec3 b);
+
+
 		static const Vec3 up;
 		static const Vec3 right;
 		static const Vec3 forward;

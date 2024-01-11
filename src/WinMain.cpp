@@ -185,8 +185,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
 
-        xRot += (xPos - xPosOld) * deltaTime * 30;
-        yRot += (yPos - yPosOld) * deltaTime * 30;
+        xRot += (xPos - xPosOld) * deltaTime * 50;
+        yRot += (yPos - yPosOld) * deltaTime * 50;
         
         //std::cout << xPos - xPosOld << "\n";
         yRot = std::clamp(yRot, -90, 90);

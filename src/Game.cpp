@@ -31,6 +31,7 @@ namespace Game
 
 	void Run()
 	{
+		std::cout << Vec3::Distance(cube1.pos, cube2.pos) << "\n";
 		SpawnStuff();
 		Move();
 	}
@@ -44,7 +45,8 @@ namespace Game
 	/// <returns>True</returns>
 	bool IsBoxColliding(Vec3 a, Vec3 b)
 	{
-		if()
+		if(Vec3::Distance(a,b) <= 0)
+		{
 			// Collide
 			return true;
 		}

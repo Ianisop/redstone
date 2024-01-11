@@ -153,6 +153,11 @@ namespace Lapis
 		return *this;
 	}
 
+	float Vec3::Distance(Vec3 a, Vec3 b)
+	{
+		return sqrt(powf((b.x - a.x), 2)+powf((b.y - a.y),2)+powf((b.z-a.z),2));
+	}
+
 	////////////////////// Vec4
 
 	Vec4 Lapis::Vec4::operator+(const Vec4& other) const
