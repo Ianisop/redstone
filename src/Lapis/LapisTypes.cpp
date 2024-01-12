@@ -155,12 +155,16 @@ namespace Lapis
 
 	float Vec3::Distance(Vec3 a, Vec3 b)
 	{
+<<<<<<< Updated upstream
 		return sqrt(powf((b.x - a.x), 2)+powf((b.y - a.y),2)+powf((b.z-a.z),2));
 	}
 
 	float Vec3::Magnitude(Vec3 a)
 	{
 		return sqrtf(powf(a.x,2)+powf(a.y,2)+powf(a.z,2));
+=======
+		return (std::powf(b.x - a.x,2))+(std::powf(b.y-a.y,2))+(std::powf(b.z-a.z,2));
+>>>>>>> Stashed changes
 	}
 
 	////////////////////// Vec4

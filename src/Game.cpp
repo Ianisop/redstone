@@ -14,6 +14,14 @@ using namespace Lapis;
 
 namespace Game
 {
+<<<<<<< Updated upstream
+=======
+	//Transforms for instantiated obj
+	Lapis::Transform cube1;
+	Lapis::Transform cube2;
+	Lapis::Transform player;
+	bool flag = false;
+>>>>>>> Stashed changes
 
 	//Physics
 	float gravity = 9.81f;
@@ -69,15 +77,32 @@ namespace Game
 	void Run()
 	{
 		SpawnStuff();
+<<<<<<< Updated upstream
 		MovePlayer();
 		mainCamera.pos.y = 0;
+=======
+		Test();
+>>>>>>> Stashed changes
 	}
 
+	void Test()
+	{
+		if (!IsBoxColliding(cube1.pos, cube2.pos))
+		{
+			cube1.pos.x += 0.05;
+			cube2.pos.x -= 0.05;
+		}
+	}
 
 	// use for 3D box collision
 	bool IsBoxColliding(Vec3 a, Vec3 b)
 	{
+<<<<<<< Updated upstream
 		if(Vec3::Distance(a,b) <= 1)
+=======
+		std::cout << Vec3::Distance(a, b) << "\n";
+		if(Vec3::Distance(a,b) <= 0)
+>>>>>>> Stashed changes
 		{
 			// Collide
 			std::cout << "Colliding" << "\n";
@@ -85,6 +110,7 @@ namespace Game
 		}
 		return false;
 	}
+<<<<<<< Updated upstream
 
 	//test collision
 	void Move()
@@ -169,4 +195,6 @@ namespace Game
 		}
 	}
 
+=======
+>>>>>>> Stashed changes
 }

@@ -104,6 +104,9 @@ namespace Lapis
 		Vec3& operator+=(const Vec3& other);
 		Vec3& operator-=(const Vec3& other);
 
+
+		static float Distance(Vec3 a, Vec3 b);
+
 		friend std::ostream& operator<<(std::ostream& os, const Vec3& v3)
 		{
 			os << v3.x << '/' << v3.y << '/' << v3.z;
