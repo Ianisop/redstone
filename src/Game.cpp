@@ -126,7 +126,7 @@ namespace Game
 
 		mainCamera.pos += playerVelocity * deltaTime;
 
-		std::cout << std::format("{} , {}  {} \n",mainCamera.pos.y, ground.pos.y, IsGrounded(mainCamera.pos));
+		//std::cout << std::format("{} , {}  {} \n",mainCamera.pos.y, ground.pos.y, IsGrounded(mainCamera.pos));
 	}
 
 	bool IsGrounded(Vec3& pos)

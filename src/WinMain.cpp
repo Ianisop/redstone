@@ -5,6 +5,7 @@
 #include <windowsx.h>
 #include <wingdi.h>
 #include <algorithm>
+#include <hidusage.h>
 
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
@@ -39,7 +40,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 // entry point
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
-    
+
     // define window class
     WNDCLASSEX wc;
     ZeroMemory(&wc, sizeof(WNDCLASSEX));
@@ -72,8 +73,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         WS_OVERLAPPEDWINDOW,    // window style //WS_POPUP
         300,    // x-position of the window
         300,    // y-position of the window
-        wr.right -wr.left,    // width of the window
-        wr.bottom -wr.top,    // height of the window
+        wr.right - wr.left,    // width of the window
+        wr.bottom - wr.top,    // height of the window
         NULL,    // we have no parent window, NULL
         NULL,    // we aren't using menus, NULL
         hInstance,    // application handle
@@ -85,7 +86,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     //MARGINS margins = { -1 }; ;
     //DwmExtendFrameIntoClientArea(hwnd, &margins);
 
-  
+
 
     std::cout << "created device and swapchain\n";
 
@@ -101,6 +102,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     printf("initting lapis\n");
     Lapis::InitLapis(hwnd);
 
+    RAWINPUTDEVICE device[1];
+    device[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+    device[0].usUsage = HID_USAGE_GENERIC_MOUSE;
+    device[0].dwFlags = RIDEV_INPUTSINK;        // do not generate legacy messages such as WM_KEYDOWN
+    device[0].hwndTarget = hwnd;
+    RegisterRawInputDevices(device, 1, sizeof(device));
 
     float FPS_CAP = 60;
     bool LIMIT_FPS = false;
@@ -109,18 +116,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     while (true && !GetAsyncKeyState(VK_ESCAPE))
     {
         using namespace Lapis;
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+        do{
+            PeekMessage(&msg, NULL, 0, 0, PM_REMOVE); 
             TranslateMessage(&msg);
             DispatchMessage(&msg);
 
             if (msg.message == WM_QUIT)
                 break;
-        }
-        float movementSpeed = 1;
-
-       
-
-
+        } while (msg.message == WM_INPUT);
 
         static int checkerboardSize = 25;
         Color col;
@@ -168,33 +171,39 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
         break;
 
-    case WM_MOUSEMOVE:
-    
+    case WM_INPUT:
         using namespace Lapis;
-
+        UINT dwSize = sizeof(RAWINPUT);
+        static BYTE lpb[sizeof(RAWINPUT)];
+        int xPosRelative{};
+        int yPosRelative{};
         static int xRot{}, yRot{};
-        static int xPosOld{ GET_X_LPARAM(lParam) }, yPosOld{ GET_Y_LPARAM(lParam) };
 
-        int xPos = GET_X_LPARAM(lParam);
-        int yPos = GET_Y_LPARAM(lParam);
+        GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
 
-        xRot += (xPos - xPosOld) * deltaTime * 50;
-        yRot += (yPos - yPosOld) * deltaTime * 50;
+        RAWINPUT* raw = (RAWINPUT*)lpb;
+
+        if (raw->header.dwType == RIM_TYPEMOUSE)
+        {
+            xPosRelative = raw->data.mouse.lLastX;
+            yPosRelative = raw->data.mouse.lLastY;
+        }
+
+        xRot += xPosRelative * deltaTime * 15;
+        yRot += yPosRelative * deltaTime * 15;
+        POINT p = {clientRect.width / 2, clientRect.height / 2};
+    
+        ClientToScreen(hwnd, &p);
+        SetCursorPos(p.x, p.y);
+        ShowCursor(false);
         
-        //std::cout << xPos - xPosOld << "\n";
         yRot = std::clamp(yRot, -90, 90);
-
-        
 
         //std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
 
-        xPosOld = xPos;
-        yPosOld = yPos;
-        
-
         break;
-    }
 
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
 }
