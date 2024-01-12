@@ -13,6 +13,7 @@ namespace Game
 	void MovePlayer();
 	bool IsGrounded(Vec3& pos);
 	void ApplyGravity(Vec3& pos);
-
+	Vec3 Raycast(Transform raycastStart, float dist);
+	bool IsLineColliding(const Vec3& start, const Vec3& end, const Transform& object);
 
 }

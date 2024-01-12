@@ -16,24 +16,25 @@ namespace Game
 {
 
 	//Physics
-	float gravity = 9.81f;
+	float gravity = 1.0f;
 	std::vector<Transform> physicsObjects; // list for the objects that will get physics
 
 
 
 	//Transforms for instantiated obj
+	std::vector<Transform> liveObjects;
 	Transform cube1;
 	Transform cube2;
 	Transform ground;
+	Transform transformInSight;
 	bool flag = false; // debug
-	static int checkerboardSize = 25;
-	Color col;
+
 
 
 	//PLAYER VARS
-	float movementSpeed = 1;
+	float movementSpeed = 2.5;
 	Vec3 playerVelocity;
-	float jumpSpeed = -5;
+	float jumpSpeed = 10;
 
 
 	//MISC
@@ -45,22 +46,20 @@ namespace Game
 		if (flag == false)
 		{
 			//physicsObjects.push_back(mainCamera);
+			liveObjects.push_back(cube1);
+			liveObjects.push_back(cube2);
+			liveObjects.push_back(ground);
+			liveObjects.push_back(transformInSight);
+			ground.scale.x = 10;
+			ground.scale.z = 10;
+			ground.pos.y = 0;
 			cube2.pos.z = 2;
 			cube2.pos.y = 2;
 			flag = true;
 		}
 
-		for (int i = 0; i < checkerboardSize; i++) {
-			for (int j = 0; j < checkerboardSize; j++) {
-				ground = Transform(Vec3(i - checkerboardSize / 2, 0, j - checkerboardSize / 2), 0, 1);
-				if (((i % 2) + j) % 2 == 1)
-					col = "ffffff";
-				else
-					col = "000000";
-				Draw::D3::Plane(ground, col);
-			}
-		}
-		Draw::D3::Cube(Transform(cube2), Color(255, 1, 0, 1));
+		Draw::D3::Plane(Transform(ground), "ffffff");
+		Draw::D3::Cube(Transform(cube2), "ffff00");
 
 
 	}
@@ -70,7 +69,8 @@ namespace Game
 	{
 		SpawnStuff();
 		MovePlayer();
-		mainCamera.pos.y = 0;
+		Raycast(mainCamera, 20);
+		mainCamera.pos.y = 2;
 	}
 
 
@@ -107,48 +107,19 @@ namespace Game
 		// Movement controls
 		playerVelocity = Vec3();  // Reset velocity
 
-		if (GetAsyncKeyState('A')) playerVelocity += mainCamera.Right() * movementSpeed;
-		if (GetAsyncKeyState('D')) playerVelocity -= mainCamera.Right() * movementSpeed;
-		if (GetAsyncKeyState('W')) playerVelocity -= mainCamera.Forward() * movementSpeed;
-		if (GetAsyncKeyState('S')) playerVelocity += mainCamera.Forward() * movementSpeed;
+		if (GetAsyncKeyState('A')) playerVelocity -= mainCamera.Right() * movementSpeed;
+		if (GetAsyncKeyState('D')) playerVelocity += mainCamera.Right() * movementSpeed;
+		if (GetAsyncKeyState('W')) playerVelocity += mainCamera.Forward() * movementSpeed;
+		if (GetAsyncKeyState('S')) playerVelocity -= mainCamera.Forward() * movementSpeed;
 		
-
-		// Jumping control
-		if (GetAsyncKeyState(VK_SPACE) && IsGrounded(mainCamera.pos)) {
-			
-			playerVelocity.y += jumpSpeed;
-		}
-
-	
-		ApplyGravity(playerVelocity);
-		
-		
-
-		mainCamera.pos += playerVelocity * deltaTime;
 
 		//std::cout << std::format("{} , {}  {} \n",mainCamera.pos.y, ground.pos.y, IsGrounded(mainCamera.pos));
 	}
 
 	bool IsGrounded(Vec3& pos)
 	{
-		float closestGroundY = FLT_MIN;
-
-		for (int i = 0; i < checkerboardSize; i++) {
-			for (int j = 0; j < checkerboardSize; j++) {
-				// Calculate current ground position based on the loop indices
-				float currentGroundY = ground.pos.y + i;  // Adjust based on your grid configuration
-
-				// Check if the current ground is closer to the player's y-position
-				if (abs(pos.y - currentGroundY) < abs(pos.y - closestGroundY)) {
-					closestGroundY = currentGroundY;
-				}
-			}
-		}
-
-		return pos.y <= closestGroundY;
+		return pos.y <= ground.pos.y;
 	}
-
-
 	
 	// Processes physics for all the stuff thats included
 	void ProcessPhysics()
@@ -159,8 +130,6 @@ namespace Game
 		}
 	}
 
-
-
 	void ApplyGravity(Vec3& pos)
 	{
 		if (!IsGrounded(pos))
@@ -168,5 +137,51 @@ namespace Game
 			pos.y += gravity * deltaTime;
 		}
 	}
+
+
+
+	Vec3 Raycast(Transform raycastStart, float dist)
+	{
+		// Get the player's position and forward direction
+		Vec3 raycastDirection = raycastStart.Forward();
+
+		// Calculate the end point of the ray
+		Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;  // Adjust the distance as needed
+
+		// Draw the ray for visualization
+		Draw::D3::Line(raycastStart.pos, raycastEnd, "ff0000");
+
+
+		for (const Transform& object : liveObjects)
+		{
+			if (IsLineColliding(raycastStart.pos, raycastEnd, object))
+			{
+				std::cout << "Ray hit object!\n";
+				return object.pos;  // Return the position of the collided object
+			}
+		}
+
+
+		return Vec3();
+	}
+
+	
+	bool IsLineColliding(const Vec3& start, const Vec3& end, const Transform& object)
+	{
+		// Assuming the object is a cube for simplicity, you may need a more complex check for other shapes
+		Vec3 minBounds = object.pos - Vec3(object.scale.x / 2.0f, object.scale.y / 2.0f, object.scale.z / 2.0f);
+		Vec3 maxBounds = object.pos + Vec3(object.scale.x / 2.0f, object.scale.y / 2.0f, object.scale.z / 2.0f);
+
+		// Check for intersection between the line and the axis-aligned bounding box (AABB)
+		// This is a basic AABB intersection test and might need modification based on your specific needs
+		return (start.x >= minBounds.x && start.x <= maxBounds.x &&
+			start.y >= minBounds.y && start.y <= maxBounds.y &&
+			start.z >= minBounds.z && start.z <= maxBounds.z) ||
+			(end.x >= minBounds.x && end.x <= maxBounds.x &&
+				end.y >= minBounds.y && end.y <= maxBounds.y &&
+				end.z >= minBounds.z && end.z <= maxBounds.z);
+	}
+
+
 
 }

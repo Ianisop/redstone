@@ -125,17 +125,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 break;
         } while (msg.message == WM_INPUT);
 
-        static int checkerboardSize = 25;
-        Color col;
-        for (int i = 0; i < checkerboardSize; i++) {
-            for (int j = 0; j < checkerboardSize; j++) {
-                if (((i % 2) + j) % 2 == 1)
-                    col  = "ffffff";
-                else
-                    col = "000000";
-                Draw::D3::Plane(Transform(Vec3(i - checkerboardSize / 2, -2, j - checkerboardSize / 2), 0, 1), col);
-            }
-        }
 
 
         Game::Run();
@@ -187,18 +176,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             yPosRelative = raw->data.mouse.lLastY;
         }
 
-        xRot += xPosRelative * deltaTime * 15;
-        yRot += yPosRelative * deltaTime * 15;
+        xRot -= xPosRelative * deltaTime * 80;
+        yRot -= yPosRelative * deltaTime * 80;
         POINT p = {clientRect.width / 2, clientRect.height / 2};
     
         ClientToScreen(hwnd, &p);
-        SetCursorPos(p.x, p.y);
-        ShowCursor(false);
-        
+
         yRot = std::clamp(yRot, -90, 90);
 
         //std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
+
+        SetCursorPos(p.x, p.y);
+        ShowCursor(false);
 
         break;
 
