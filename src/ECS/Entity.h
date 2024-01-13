@@ -38,18 +38,16 @@ public:
     }
 
     template <typename T>
-    std::unique_ptr<T>& GetComponent() {
+    std::shared_ptr<T> GetComponent() {
         const char* typeName = typeid(T).name();
         auto it = components.find(typeName);
 
         if (it != components.end()) {
-            return std::dynamic_pointer_cast<T>(it->second);
+            return std::static_pointer_cast<T>(it->second);
         }
 
-
-        throw std::runtime_error("Component not found");
+        // Handle case when component is not found.
+        // This may throw an exception or return a default-constructed shared_ptr.
+       // throw std::runtime_error("Component not found");
     }
-
-
-
 };

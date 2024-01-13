@@ -6,7 +6,7 @@
 struct Renderer : public Component
 {
 public:
-	Lapis::Color col = "ffffff";
+	std::unique_ptr<Lapis::Color> col = std::make_unique<Lapis::Color>("ffffff");
 	
 
 };
