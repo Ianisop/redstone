@@ -8,117 +8,112 @@
 #include <thread>
 #include <functional>
 #include <random>
-
+#include <algorithm>
+#include "ECS/Entity.h"
+#include "ECS/Component.h"
+#include "ECS/Components.h"
 
 using namespace Lapis;
 
-namespace Game
-{
+namespace Game {
 
-	//Physics
-	float gravity = 1.0f;
-	std::vector<Transform> physicsObjects; // list for the objects that will get physics
+    bool flag = false;
 
+    // Physics
+    float gravity = 1.0f;
 
+    // Player entity and components
+    Entity playerEntity;
+    std::shared_ptr<Transform> playerTransform;
+    float movementSpeed = 2;
 
-	//Transforms for instantiated obj
-	std::vector<Transform> liveObjects;
-	Transform cube1;
-	Transform cube2;
-	Transform ground;
-	Transform transformInSight;
-	bool flag = false; // debug
-
-
-
-	//PLAYER VARS
-	float movementSpeed = 2.5;
-	Vec3 playerVelocity;
-	float jumpSpeed = 10;
+    // Other entities and components
+    std::vector<Entity> physicsObjects;
+    std::vector<Entity> liveObjects;
+    Entity ground;
+    Entity cube2;
 
 
-	//MISC
-	std::random_device rd;
-	std::mt19937 gen(rd());
+    // MISC
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
-	void SpawnStuff()
-	{
-		if (flag == false)
-		{
-			//physicsObjects.push_back(mainCamera);
-			liveObjects.push_back(cube1);
-			liveObjects.push_back(cube2);
-			liveObjects.push_back(ground);
-			liveObjects.push_back(transformInSight);
-			ground.scale.x = 10;
-			ground.scale.z = 10;
-			ground.pos.y = 0;
-			cube2.pos.z = 2;
-			cube2.pos.y = 2;
-			flag = true;
-		}
+    void InitializePlayer() {
+        playerEntity = Entity();
+        playerTransform = playerEntity.AddComponent<Transform>();
+        // Set initial player properties
+        playerTransform->position = Vec3(0.0f, 0.0f, 0.0f);
 
-		Draw::D3::Plane(Transform(ground), "ffffff");
-		Draw::D3::Cube(Transform(cube2), "ffff00");
+    }
 
-
-	}
+    void InitializeObjects() {
+        if (flag != true)
+        {
+            /* actual init function
+            for (Entity& obj : liveObjects)
+            {
+                obj.AddComponent<Transform>();                      // add Transforms
+                obj.AddComponent<Rigidbody>();                      // add Phyics component
+                obj.AddComponent<Renderer>();                       // add Rendering component
+            
+            }*/
 
 
-	void Run()
-	{
-		SpawnStuff();
-		MovePlayer();
-		Raycast(mainCamera, 20);
-		mainCamera.pos.y = 2;
-	}
 
+            // debuggg
+            auto groundTransform = ground.AddComponent<Transform>();
 
-	// use for 3D box collision
-	bool IsBoxColliding(Vec3 a, Vec3 b)
-	{
-		if(Vec3::Distance(a,b) <= 1)
-		{
-			// Collide
-			std::cout << "Colliding" << "\n";
-			return true;
-		}
-		return false;
-	}
+            groundTransform->position = Vec3(0.0f, -2.0f, 0.0f);
 
-	//test collision
-	void Move()
-	{
-		if (!IsBoxColliding(cube1.pos, cube2.pos))
-		{
-			cube1.pos.x += 0.05;
-			cube2.pos.x -= 0.05;
-		}
-		else if (IsBoxColliding(cube1.pos, cube2.pos) && GetAsyncKeyState('F'))
-		{
-			cube1.pos.x -= 1;
-			cube2.pos.x += 1;
-		}
-		
-	}
+            auto cube2Transform = cube2.AddComponent<Transform>();
 
-	void MovePlayer()
-	{
-		// Movement controls
-		playerVelocity = Vec3();  // Reset velocity
+            cube2Transform->position = Vec3(10.0f, 2.0f, 2.0f);
+            liveObjects.push_back(cube2);
+            flag = true;
+        }
 
-		if (GetAsyncKeyState('A')) playerVelocity -= mainCamera.Right() * movementSpeed;
-		if (GetAsyncKeyState('D')) playerVelocity += mainCamera.Right() * movementSpeed;
-		if (GetAsyncKeyState('W')) playerVelocity += mainCamera.Forward() * movementSpeed;
-		if (GetAsyncKeyState('S')) playerVelocity -= mainCamera.Forward() * movementSpeed;
-		
+    }
 
-		//std::cout << std::format("{} , {}  {} \n",mainCamera.pos.y, ground.pos.y, IsGrounded(mainCamera.pos));
-	}
+    void SpawnStuff()
+    {
+        //Draw ground
+        Draw::D3::Plane(*ground.GetComponent<Transform>(), ground.GetComponent<Renderer>()->col);
+
+        for (Entity& obj : liveObjects) {
+            Draw::D3::Cube(*obj.GetComponent<Transform>(), obj.GetComponent<Renderer>()->col);
+        }
+    }
+
+    void Run() {
+        InitializePlayer();
+        InitializeObjects();
+        SpawnStuff();
+        MovePlayer();
+
+    }
+
+    void MovePlayer() {
+        // Movement controls
+        if (GetAsyncKeyState('A')) {
+            playerTransform->position -= playerTransform->Right() * movementSpeed;
+        }
+        if (GetAsyncKeyState('D')) {
+            playerTransform->position += playerTransform->Right() * movementSpeed;
+        }
+        if (GetAsyncKeyState('W')) {
+            playerTransform->position += playerTransform->Forward() * movementSpeed;
+        }
+        if (GetAsyncKeyState('S')) {
+            playerTransform->position -= playerTransform->Forward() * movementSpeed;
+        }
+
+        // Apply gravity
+        //playerPhysics->ApplyGravity(playerTransform->position);
+    }
 
 	bool IsGrounded(Vec3& pos)
 	{
-		return pos.y <= ground.pos.y;
+		return pos.y <= ground.GetComponent<Transform>()->pos.y;
 	}
 	
 	// Processes physics for all the stuff thats included
@@ -126,7 +121,7 @@ namespace Game
 	{
 		for (int i = 0; i < physicsObjects.size(); i++)
 		{
-			ApplyGravity(physicsObjects[i].pos);
+			ApplyGravity(physicsObjects[i].GetComponent<Transform>()->pos);
 		}
 	}
 
@@ -140,48 +135,41 @@ namespace Game
 
 
 
-	Vec3 Raycast(Transform raycastStart, float dist)
-	{
-		// Get the player's position and forward direction
-		Vec3 raycastDirection = raycastStart.Forward();
+    bool IsLineColliding(const Vec3& start, const Vec3& end, Transform& transformComponent)
+    {
+        Vec3 minBounds = transformComponent.position - Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
+        Vec3 maxBounds = transformComponent.position + Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
 
-		// Calculate the end point of the ray
-		Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;  // Adjust the distance as needed
-
-		// Draw the ray for visualization
-		Draw::D3::Line(raycastStart.pos, raycastEnd, "ff0000");
-
-
-		for (const Transform& object : liveObjects)
-		{
-			if (IsLineColliding(raycastStart.pos, raycastEnd, object))
-			{
-				std::cout << "Ray hit object!\n";
-				return object.pos;  // Return the position of the collided object
-			}
-		}
+        // Check for intersection between the point and the AABB
+        return (start.x >= minBounds.x && start.x <= maxBounds.x &&
+            start.y >= minBounds.y && start.y <= maxBounds.y &&
+            start.z >= minBounds.z && start.z <= maxBounds.z) ||
+            (end.x >= minBounds.x && end.x <= maxBounds.x &&
+                end.y >= minBounds.y && end.y <= maxBounds.y &&
+                end.z >= minBounds.z && end.z <= maxBounds.z);
+    }
 
 
-		return Vec3();
-	}
 
-	
-	bool IsLineColliding(const Vec3& start, const Vec3& end, const Transform& object)
-	{
-		// Assuming the object is a cube for simplicity, you may need a more complex check for other shapes
-		Vec3 minBounds = object.pos - Vec3(object.scale.x / 2.0f, object.scale.y / 2.0f, object.scale.z / 2.0f);
-		Vec3 maxBounds = object.pos + Vec3(object.scale.x / 2.0f, object.scale.y / 2.0f, object.scale.z / 2.0f);
-
-		// Check for intersection between the line and the axis-aligned bounding box (AABB)
-		// This is a basic AABB intersection test and might need modification based on your specific needs
-		return (start.x >= minBounds.x && start.x <= maxBounds.x &&
-			start.y >= minBounds.y && start.y <= maxBounds.y &&
-			start.z >= minBounds.z && start.z <= maxBounds.z) ||
-			(end.x >= minBounds.x && end.x <= maxBounds.x &&
-				end.y >= minBounds.y && end.y <= maxBounds.y &&
-				end.z >= minBounds.z && end.z <= maxBounds.z);
-	}
+    Vec3 Raycast(Transform raycastStart, float dist)
+    {
+        Vec3 raycastDirection = raycastStart.Forward();
+        Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
 
 
+        for (Entity& object : liveObjects)
+        {
+            auto transformComponent = *object.GetComponent<Transform>();
+            if (IsLineColliding(raycastStart.pos, raycastDirection, transformComponent))
+            {
+                return transformComponent.position;
+            }
+        }
+
+        return Vec3();
+    }
 
 }
+
+
+

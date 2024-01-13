@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include "../ECS/Component.h"
 
 namespace Lapis
 {
@@ -101,6 +102,7 @@ namespace Lapis
 		Vec3 operator+(const Vec3& other) const;
 		Vec3 operator-(const Vec3& other) const;
 		Vec3 operator*(const float& scalar) const;
+		Vec3 operator/(const float& scalar) const;
 
 		Vec3& operator+=(const Vec3& other);
 		Vec3& operator-=(const Vec3& other);
@@ -209,7 +211,7 @@ namespace Lapis
 		{}
 	};
 
-	struct Transform
+	struct Transform : public Component
 	{
 		union
 		{

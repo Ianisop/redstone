@@ -145,6 +145,17 @@ namespace Lapis
 		return res;
 	}
 
+	Vec3 Vec3::operator/(const float& scalar) const
+	{
+		Vec3 res;
+
+		res.x = x / scalar;
+		res.y = y / scalar;
+		res.z = z / scalar;
+
+		return res;
+	}
+
 	Vec3& Vec3::operator+=(const Vec3& other)
 	{
 		x += other.x;
@@ -278,4 +289,9 @@ namespace Lapis
 
 		return res;
 	}
+
+
+	//transform
+
 }
+
