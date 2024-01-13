@@ -32,6 +32,7 @@ namespace Game {
     std::vector<Entity> liveObjects;
     Entity ground;
     Entity cube2;
+    Entity entityInSight;
 
     // MISC
     std::random_device rd;
@@ -45,17 +46,14 @@ namespace Game {
         
     }
 
+
+    //this is basically the start function
     void InitializeObjects()
     {
         if (flag != true)
         {
-            auto groundTransform = ground.AddComponent<Transform>();
-            ground.AddComponent<Renderer>();
-            groundTransform->position = Vec3(0.0f, 0.0f, 0.0f);
-            *ground.GetComponent<Renderer>()->col = "ffffff";
-            auto cube2Transform = cube2.AddComponent<Transform>();
-            cube2Transform->position = Vec3(10.0f, 2.0f, 2.0f);
             liveObjects.push_back(cube2);
+            liveObjects.push_back(ground);
             flag = true;
         }
     }
@@ -66,7 +64,7 @@ namespace Game {
         auto groundTransform = ground.GetComponent<Transform>();
         auto groundRenderer = ground.GetComponent<Renderer>();
         //std::cout << std::format("renderer: {} \n ", groundRenderer->col.get()->r);
-
+        
         if (groundTransform && groundRenderer)  
         {
             Draw::D3::Plane(*groundTransform, *groundRenderer->col);
@@ -74,6 +72,7 @@ namespace Game {
             std::cout << mainCamera.pos.y << std::endl;
         }
 
+        //this draws all the objects
         for (Entity& obj : liveObjects)
         {
             auto objTransform = obj.GetComponent<Transform>();
@@ -81,8 +80,6 @@ namespace Game {
             if (objTransform && objRenderer)
             {
                 Draw::D3::Cube(*objTransform, *objRenderer->col);
-
-
             }
         }
     }
@@ -113,22 +110,6 @@ namespace Game {
         }
 
         //std::cout << Vec3::Magnitude(mainCamera.pos) << std::endl;
-    }
-
-    bool IsGrounded(Vec3& pos) {
-        return pos.y <= ground.GetComponent<Transform>()->pos.y;
-    }
-
-    void ProcessPhysics() {
-        for (int i = 0; i < physicsObjects.size(); i++) {
-            ApplyGravity(physicsObjects[i].GetComponent<Transform>()->pos);
-        }
-    }
-
-    void ApplyGravity(Vec3& pos) {
-        if (!IsGrounded(pos)) {
-            pos.y += gravity * deltaTime;
-        }
     }
 
     bool IsLineColliding(const Vec3& start, const Vec3& end, Transform& transformComponent) {
