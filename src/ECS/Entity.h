@@ -4,12 +4,14 @@
 #include <string>
 #include "../Lapis/LapisTypes.h"
 #include "Component.h"
+#include <string.h>
 
 class Entity {
 private:
     std::unordered_map<std::string, std::shared_ptr<Component>> components;
 
 public:
+    std::string tag;
     template <typename T, typename... Args>
     std::shared_ptr<T> AddComponent(Args&&... args) {
         const char* typeName = typeid(T).name();

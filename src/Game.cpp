@@ -32,6 +32,7 @@ namespace Game {
     std::vector<Entity> liveObjects;
     Entity ground;
     Entity cube2;
+    Entity cube1;
     Entity entityInSight;
 
     // MISC
@@ -43,7 +44,6 @@ namespace Game {
         playerEntity = Entity();
         playerTransform = playerEntity.AddComponent<Transform>();
         *playerTransform = mainCamera;
-        
     }
 
 
@@ -52,8 +52,28 @@ namespace Game {
     {
         if (flag != true)
         {
+            // OBJECTS IN SCENE GO HERE
             liveObjects.push_back(cube2);
             liveObjects.push_back(ground);
+            liveObjects.push_back(cube1);
+
+            ground.tag = "ground";
+            cube2.tag = "cube";
+
+            std::cout << "Ground tag: " << ground.tag << std::endl;
+            std::cout << "Cube2 tag: " << cube2.tag << std::endl;
+
+            //this adds comps
+            for (Entity& obj : liveObjects)
+            {
+                obj.AddComponent<Transform>();
+                obj.AddComponent<Renderer>();
+                std::string* k = &obj.tag;
+                std::cout << std::format("Creating obj({}) \n", *k);
+
+            }
+
+            std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
             flag = true;
         }
     }
@@ -63,35 +83,63 @@ namespace Game {
         // Draw ground
         auto groundTransform = ground.GetComponent<Transform>();
         auto groundRenderer = ground.GetComponent<Renderer>();
-        //std::cout << std::format("renderer: {} \n ", groundRenderer->col.get()->r);
-        
-        if (groundTransform && groundRenderer)  
+
+        if (groundTransform && groundRenderer)
         {
+            std::cout << "Rendering ground..." << std::endl;
+
+            groundTransform->scale.x = 10;
+            groundTransform->scale.z = 10;
+            groundTransform->pos.y = 0;
+
             Draw::D3::Plane(*groundTransform, *groundRenderer->col);
-            std::cout << "Ground spawned: " << groundTransform->pos.y << std::endl;
+
+            std::cout << "Ground rendered at y = " << &groundTransform->pos.y << std::endl;
+            std::cout << "Main camera y = " << mainCamera.pos.y << std::endl;
+
+            *groundRenderer->col = "798674";
+        }
+
+
+        //raycasting debugging
+        auto cubeTransform = cube1.GetComponent<Transform>();
+        auto cubeRenderer = cube1.GetComponent<Renderer>();
+        //std::cout << std::format("renderer: {} \n ", groundRenderer->col.get()->r);
+
+        if (cubeTransform && cubeRenderer)
+        {
+            cubeTransform->pos.x = 10;
+            Draw::D3::Cube(*cubeTransform, *cubeRenderer->col);
             std::cout << mainCamera.pos.y << std::endl;
         }
 
-        //this draws all the objects
+
+
+        //this draws all the objects(cubes rn cos im retarded)
         for (Entity& obj : liveObjects)
         {
             auto objTransform = obj.GetComponent<Transform>();
             auto objRenderer = obj.GetComponent<Renderer>();
-            if (objTransform && objRenderer)
+
+            if (objTransform && objRenderer && obj.tag != "cube")
             {
+                //std::cout << "Rendering cube with tag: " << obj.tag << std::endl;
+
                 Draw::D3::Cube(*objTransform, *objRenderer->col);
             }
         }
+
     }
 
 
-    void Run() {
+    void Run()
+    {
         InitializePlayer();
         InitializeObjects();
         SpawnStuff();
         MovePlayer();
         mainCamera.pos.y = 0.1;
-        //std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
+        
     }
 
     void MovePlayer() {
