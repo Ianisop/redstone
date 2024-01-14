@@ -1,13 +1,14 @@
 #pragma once
 
-#include <memory>  // For std::shared_ptr
+#include <memory>  
 
-class Entity;  // Forward declaration
+class Entity;  
 
 enum class ComponentType {
     Transform,
     Renderer,
-    // Add more component types as needed
+    Rigidbody
+    
 };
 
 class Component {

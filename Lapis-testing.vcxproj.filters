@@ -11,6 +11,7 @@
     <ClCompile Include="src\Lapis\Draw\D3.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ECS\Entity.cpp" />
+    <ClCompile Include="src\ECS\Components.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\hsl-to-rgb.hpp" />

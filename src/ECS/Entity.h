@@ -7,17 +7,15 @@
 #include <string.h>
 
 class Entity {
-
-
 private:
     std::unordered_map<std::string, std::shared_ptr<Component>> components;
     std::string tag;
 
 public:
     Entity() {}
-    Entity(std::string val) { tag = val; }
+    Entity(std::string val) : tag(val) {}
     std::string GetTag() { return tag; }
-    //void SetTag(std::string str) { tag = str; }
+
     template <typename T, typename... Args>
     std::shared_ptr<T> AddComponent(Args&&... args) {
         const char* typeName = typeid(T).name();
@@ -50,14 +48,14 @@ public:
         const char* typeName = typeid(T).name();
         auto it = components.find(typeName);
 
-        if (it != components.end()) {
+        if (it != components.end() && it->second) {
             return std::static_pointer_cast<T>(it->second);
         }
-       //throw std::runtime_error("Component not found");
-    }
 
+        // If the component is not found or is a nullptr, return nullptr
+        return nullptr;
+    }
 
     bool operator==(Entity* other);
     bool operator!=(Entity* other);
-
 };

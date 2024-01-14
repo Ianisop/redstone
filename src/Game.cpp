@@ -15,8 +15,7 @@
 #include "Timer.h"
 
 
-#define maximum(a, b) ((a) > (b) ? (a) : (b))
-#define minimum(a, b) ((a) < (b) ? (a) : (b))
+
 
 
 using namespace Lapis;
@@ -138,22 +137,13 @@ namespace Game {
         InitializeObjects();
         SpawnStuff();
         MovePlayer();
-        entityInSight = Raycast(mainCamera, 2000);
+        entityInSight = player.GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
         //debug for raycasting
         if (entityInSight.GetTag() != "")
         {
             std::cout << entityInSight.GetTag() << std::endl;
         }
-        
 
-        if (!spawner.IsExpired())
-        {
-            spawner.Update();
-
-        }
-
-
-        
         mainCamera.pos.y = 0.2;
         
         
@@ -177,49 +167,5 @@ namespace Game {
         //std::cout << Vec3::Magnitude(mainCamera.pos) << std::endl;
     }
 
-    bool IsLineColliding(const Vec3& start, const Vec3& end, Transform& transformComponent) {
-        Vec3 minBounds = transformComponent.pos - Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
-        Vec3 maxBounds = transformComponent.pos + Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
-
-
-        float tMin = 0.0f;
-        float tMax = std::numeric_limits<float>::infinity();
-
-        for (int i = 0; i < 3; ++i) {
-            float invDirection = 1.0f / (end[i] - start[i]);
-            float tNear = (minBounds[i] - start[i]) * invDirection;
-            float tFar = (maxBounds[i] - start[i]) * invDirection;
-
-            if (invDirection < 0.0f) {
-                std::swap(tNear, tFar);
-            }
-
-            tMin = maximum(tNear, tMin);
-            tMax = minimum(tFar, tMax);
-
-            if (tMin > tMax) {
-                return false;
-            }
-        }
-
-        // The line segment intersects with the AABB
-        return true;
-    }
-
-
-
-    Entity Raycast(Transform raycastStart, float dist) {
-        Vec3 raycastDirection = raycastStart.Forward();
-        Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
-
-        for (Entity& object : liveObjects) {
-            auto& transformComponent = *object.GetComponent<Transform>();
-            if (IsLineColliding(raycastStart.pos, raycastEnd, transformComponent)) {
-                return object;
-            }
-        }
-
-        return Entity();
-    }
 
 }
