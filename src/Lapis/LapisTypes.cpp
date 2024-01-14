@@ -57,6 +57,18 @@ namespace Lapis
 		return res;
 	}
 
+	
+	Color& Color::operator=(const Color& other)
+	{
+		this->a = other.a;
+		this->b = other.b;
+		this->r = other.r;
+		this->g = other.g;
+		this->rgba = other.rgba;
+		return *this;
+
+	}
+
 	////////////////////// Vec2
 
 	Vec2 Lapis::Vec2::operator-() const
@@ -173,6 +185,24 @@ namespace Lapis
 
 		return *this;
 	}
+
+	float& Vec3::operator[](int index)
+	{
+			
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else throw std::out_of_range("Index out of range");
+	}
+
+	float Vec3::operator[](int index) const {
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else throw std::out_of_range("Index out of range");
+	}
+
+
 
 	float Vec3::Distance(Vec3 a, Vec3 b)
 	{

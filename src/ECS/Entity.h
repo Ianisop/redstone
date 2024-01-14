@@ -7,11 +7,17 @@
 #include <string.h>
 
 class Entity {
+
+
 private:
     std::unordered_map<std::string, std::shared_ptr<Component>> components;
+    std::string tag;
 
 public:
-    std::string tag;
+    Entity() {}
+    Entity(std::string val) { tag = val; }
+    std::string GetTag() { return tag; }
+    //void SetTag(std::string str) { tag = str; }
     template <typename T, typename... Args>
     std::shared_ptr<T> AddComponent(Args&&... args) {
         const char* typeName = typeid(T).name();
@@ -47,9 +53,11 @@ public:
         if (it != components.end()) {
             return std::static_pointer_cast<T>(it->second);
         }
-
-        // Handle case when component is not found.
-        // This may throw an exception or return a default-constructed shared_ptr.
-       // throw std::runtime_error("Component not found");
+       //throw std::runtime_error("Component not found");
     }
+
+
+    bool operator==(Entity* other);
+    bool operator!=(Entity* other);
+
 };

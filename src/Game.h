@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <functional>
+#include "ECS/Entity.h"
 
 using namespace Lapis;
 namespace Game
@@ -13,7 +14,7 @@ namespace Game
 	void MovePlayer();
 	bool IsGrounded(Vec3& pos);
 	void ApplyGravity(Vec3& pos);
-	Vec3 Raycast(Transform raycastStart, float dist);
+	Entity Raycast(Transform raycastStart, float dist);
 	bool IsLineColliding(const Vec3& start, const Vec3& end, Transform& transformComponent);
 
 }

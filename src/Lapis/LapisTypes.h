@@ -57,6 +57,8 @@ namespace Lapis
 		operator DXGI_RGBA();
 
 		static Color hex2rgba(const char* hex);
+
+		Color& operator=(const Color& other);
 	};
 	//using Color = DXGI_RGBA;
 
@@ -106,6 +108,8 @@ namespace Lapis
 
 		Vec3& operator+=(const Vec3& other);
 		Vec3& operator-=(const Vec3& other);
+		float operator[](int index) const;
+		float& operator[](int index);
 
 		friend std::ostream& operator<<(std::ostream& os, const Vec3& v3)
 		{
