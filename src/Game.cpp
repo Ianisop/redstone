@@ -12,6 +12,7 @@
 #include "ECS/Entity.h"
 #include "ECS/Component.h"
 #include "ECS/Components.h"
+#include "ECS/EventSystem.h"
 #include "Timer.h"
 
 
@@ -28,7 +29,7 @@ namespace Game {
     float gravity = 1.0f;
 
     // Player entity and components
-    Entity playerEntity;
+    Entity player("player");
     std::shared_ptr<Transform> playerTransform;
     float movementSpeed = 2;
 
@@ -39,7 +40,7 @@ namespace Game {
     Entity cube2("cube2");
     Entity cube1("cube1");
     Entity entityInSight("raycastHit");
-    Entity player("player");
+
 
 
     //TIMERS
@@ -86,9 +87,10 @@ namespace Game {
 
 
 
-            //physx objects
+            //physx objects 
            //physicsObjects.push_back(cube1);
             physicsObjects.push_back(cube2);
+           physicsObjects.push_back(player);
 
 
             //this adds comps
@@ -100,7 +102,7 @@ namespace Game {
                 std::cout << std::format("Creating entity({}) \n", obj.GetTag());
 
             }
-            for (Entity& obj : physicsObjects)
+            for (Entity &obj : physicsObjects)
             {
                 obj.AddComponent<Rigidbody>();
 
@@ -109,15 +111,16 @@ namespace Game {
             }
             std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
             std::cout << "PhysObjects: " << physicsObjects.size() << std::endl;
+            RegisterColliders();
             flag = true;
         }
-        RegisterColliders();
+
     }
 
-    auto OnCollision2 = [](const Entity &other)
-    {
-            std::cout << "Debug \n";
-    };
+    auto OnCollision2 = [](Entity& other) {
+        std::cout << "Collision detected with " << other.GetTag() << std::endl;
+
+        };
 
     void RegisterColliders()
     {
@@ -125,20 +128,18 @@ namespace Game {
         {
             auto trans = entity.GetComponent<Transform>();
             auto rigidbody = entity.GetComponent<Rigidbody>();
-            if (entity != nullptr)
-            {
-                std::string tag = entity.GetTag();
-                std::cout << tag;
-                rigidbody->SetColliderBounds(((trans->pos - trans->scale) / 2), (trans->pos + trans->scale / 2));
-                entity.RegisterCollisionHandler(OnCollision2);
-            }
-            
-            
-        }
-            
-            
-    }
 
+           if (trans && rigidbody)
+           {
+               std::cout << "setting up colls \n";
+               Vec3 minBounds = ((trans->pos - trans->scale) / 2);
+               Vec3 maxBounds = (trans->pos + trans->scale / 2);
+               rigidbody->SetColliderBounds(minBounds, maxBounds);
+               //Subscribe to collision events
+               EventSystem::Instance().SubscribeToCollision(entity, OnCollision2);
+            }
+        }
+    }
     void SpawnStuff()
     {
         //this draws all the objects(cubes rn cos im retarded)
@@ -226,10 +227,10 @@ namespace Game {
         }
 
         // Debug 
-        auto playerTransform = playerEntity.GetComponent<Transform>();
+        auto playerTransform = player.GetComponent<Transform>();
         if (playerTransform)
         {
-            std::cout << "mainCamera Position: " << mainCamera.pos << " playerEntity Transform Position: " << playerTransform->pos << std::endl;
+            //std::cout << "mainCamera Position: " << mainCamera.pos << " playerEntity Transform Position: " << playerTransform->pos << std::endl;
 
         }
     }
@@ -241,12 +242,13 @@ namespace Game {
         Vec3 newPosition = mainCamera.pos + direction * movementSpeed * deltaTime;
 
         // Check for collisions
-        for (Entity& object : liveObjects) {
+        for (Entity object : liveObjects) {
             auto transformComponent = object.GetComponent<Transform>();
             auto rigidbodyComponent = object.GetComponent<Rigidbody>();
-
+            
             if (transformComponent && rigidbodyComponent)
             {
+                //std::cout << "comps found \n";
                 if (rigidbodyComponent->IsLineIntersecting(mainCamera.pos, newPosition, *transformComponent)) {
                     std::cout << "Collision detected with object: " << object.GetTag() << std::endl;
                     std::cout << "Current Position: (" << mainCamera.pos.x << ", " << mainCamera.pos.y << ", " << mainCamera.pos.z << ")" << std::endl;

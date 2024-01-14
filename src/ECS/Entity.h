@@ -47,7 +47,7 @@ public:
         auto it = components.find(typeName);
 
         if (it != components.end() && it->second) {
-            return std::static_pointer_cast<T>(it->second);
+            return std::dynamic_pointer_cast<T>(it->second);
         }
 
         // If the component is not found or is a nullptr, return nullptr

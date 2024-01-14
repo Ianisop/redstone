@@ -12,6 +12,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\ECS\Components.cpp" />
+    <ClCompile Include="src\ECS\EventSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\hsl-to-rgb.hpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="src\ECS\Component.h" />
     <ClInclude Include="src\ECS\Components.h" />
     <ClInclude Include="src\Timer.h" />
+    <ClInclude Include="src\ECS\EventSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Lapis\shaders\DefaultStructs.hlsli" />
