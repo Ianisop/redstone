@@ -3,6 +3,14 @@
 #include "Entity.h"
 #include "../Lapis/LapisTypes.h"
 using namespace Lapis;
+
+struct BoxCollider
+{
+	Vec3 minBounds;
+	Vec3 maxBounds;
+};
+
+
 struct Renderer : public Component
 {
 public:
