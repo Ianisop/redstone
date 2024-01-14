@@ -12,6 +12,7 @@
 #include "ECS/Entity.h"
 #include "ECS/Component.h"
 #include "ECS/Components.h"
+#include "Timer.h"
 
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -41,6 +42,10 @@ namespace Game {
     Entity entityInSight("raycastHit");
     Entity player("player");
 
+
+    //TIMERS
+    Timer spawner(2);
+
     // MISC
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -57,6 +62,7 @@ namespace Game {
     {
         if (flag != true)
         {
+
             // OBJECTS IN SCENE GO HERE
             liveObjects.push_back(cube2);
             liveObjects.push_back(ground);

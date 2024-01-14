@@ -44,6 +44,7 @@
     <ClInclude Include="src\engine\shaders\compiled\UI_vertex.h" />
     <ClInclude Include="src\engine\shaders\compiled\UNLIT3d_vertex.h" />
     <ClInclude Include="src\engine\shaders\compiled\UNLIT_pixel.h" />
+    <ClInclude Include="src\Timer.h" />
     <ClInclude Include="src\utils\hsl-to-rgb.hpp" />
   </ItemGroup>
   <ItemGroup>
