@@ -7,6 +7,9 @@
 #include <string>
 #include <iostream>
 #include "../ECS/Component.h"
+#include <iomanip>
+#include <random>
+
 
 namespace Lapis
 {

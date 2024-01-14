@@ -15,8 +15,8 @@
 #include "Timer.h"
 
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
+#define maximum(a, b) ((a) > (b) ? (a) : (b))
+#define minimum(a, b) ((a) < (b) ? (a) : (b))
 
 
 using namespace Lapis;
@@ -49,6 +49,13 @@ namespace Game {
     // MISC
     std::random_device rd;
     std::mt19937 gen(rd());
+
+
+
+    float RandomFloat(float min, float max) {
+        std::uniform_real_distribution<float> dis(min, max);
+        return dis(gen);
+    }
 
     void InitializePlayer()
     {
@@ -132,11 +139,20 @@ namespace Game {
         SpawnStuff();
         MovePlayer();
         entityInSight = Raycast(mainCamera, 2000);
+        //debug for raycasting
         if (entityInSight.GetTag() != "")
         {
             std::cout << entityInSight.GetTag() << std::endl;
         }
         
+
+        if (!spawner.IsExpired())
+        {
+            spawner.Update();
+
+        }
+
+
         
         mainCamera.pos.y = 0.2;
         
@@ -178,8 +194,8 @@ namespace Game {
                 std::swap(tNear, tFar);
             }
 
-            tMin = max(tNear, tMin);
-            tMax = min(tFar, tMax);
+            tMin = maximum(tNear, tMin);
+            tMax = minimum(tFar, tMax);
 
             if (tMin > tMax) {
                 return false;

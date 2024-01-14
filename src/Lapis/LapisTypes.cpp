@@ -1,5 +1,5 @@
 #include "LapisTypes.h"
-
+#include <random>
 #include "Helpers.h"
 
 namespace Lapis

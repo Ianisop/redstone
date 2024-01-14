@@ -36,3 +36,13 @@ public:
         return elapsedTime;
     }
 };
+
+
+/* example for continous
+if (spawner.IsExpired())
+{
+    //run stuff and then reset clock
+
+    spawner.Start(); // remove this if u only need it once
+}*/
+

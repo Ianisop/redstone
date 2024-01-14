@@ -176,8 +176,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             yPosRelative = raw->data.mouse.lLastY;
         }
 
-        xRot -= xPosRelative * deltaTime * 120;
-        yRot -= yPosRelative * deltaTime * 120;
+        xRot -= xPosRelative * 1.2;
+        yRot -= yPosRelative * 1.2;
         POINT p = {clientRect.width / 2, clientRect.height / 2};
     
         ClientToScreen(hwnd, &p);
