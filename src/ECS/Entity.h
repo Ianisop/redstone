@@ -5,12 +5,10 @@
 #include "../Lapis/LapisTypes.h"
 #include "Component.h"
 #include <string.h>
+#include <functional>
+#include <vector>
 
 class Entity {
-private:
-    std::unordered_map<std::string, std::shared_ptr<Component>> components;
-    std::string tag;
-
 public:
     Entity() {}
     Entity(std::string val) : tag(val) {}
@@ -56,6 +54,28 @@ public:
         return nullptr;
     }
 
+    using CollisionHandlerFunction = std::function<void(const Entity&)>;
+
+    // Function to handle collision with another entity
+    void OnCollision(const Entity& otherEntity) {
+        // Call each registered collision handling function
+        for (const auto& collisionHandler : collisionHandlers) {
+            collisionHandler(otherEntity);
+        }
+    }
+
+    // Register a collision handling function
+    void RegisterCollisionHandler(CollisionHandlerFunction handler) {
+        collisionHandlers.push_back(handler);
+    }
+
+
     bool operator==(Entity* other);
     bool operator!=(Entity* other);
+
+private:
+    std::unordered_map<std::string, std::shared_ptr<Component>> components;
+    std::string tag;
+    std::vector<CollisionHandlerFunction> collisionHandlers;
+
 };

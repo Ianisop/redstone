@@ -12,7 +12,8 @@ namespace Game
 	void Move();
 	void SpawnStuff();
 	void MovePlayer();
-
+	bool IsCollisionInDirection(const Vec3& direction);
+	void RegisterColliders();
 
 
 }

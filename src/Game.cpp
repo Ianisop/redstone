@@ -49,7 +49,17 @@ namespace Game {
     std::random_device rd;
     std::mt19937 gen(rd());
 
+    void MoveEntity(Entity& entity, const Vec3& direction) {
+        auto transformComponent = entity.GetComponent<Transform>();
+        auto rigidbodyComponent = entity.GetComponent<Rigidbody>();
 
+        if (transformComponent && rigidbodyComponent) {
+            if (!IsCollisionInDirection(entity.GetComponent<Transform>()->Forward()))
+            {
+                transformComponent->pos += direction * movementSpeed * deltaTime;
+            }
+        }
+    }
 
     float RandomFloat(float min, float max) {
         std::uniform_real_distribution<float> dis(min, max);
@@ -72,7 +82,13 @@ namespace Game {
             // OBJECTS IN SCENE GO HERE
             liveObjects.push_back(cube2);
             liveObjects.push_back(ground);
-            liveObjects.push_back(cube1);
+            //liveObjects.push_back(cube1);
+
+
+
+            //physx objects
+           //physicsObjects.push_back(cube1);
+            physicsObjects.push_back(cube2);
 
 
             //this adds comps
@@ -81,18 +97,50 @@ namespace Game {
                 obj.AddComponent<Transform>();
                 obj.AddComponent<Renderer>();
 
-                std::cout << std::format("Creating obj({}) \n", obj.GetTag());
+                std::cout << std::format("Creating entity({}) \n", obj.GetTag());
 
             }
+            for (Entity& obj : physicsObjects)
+            {
+                obj.AddComponent<Rigidbody>();
 
+                std::cout << std::format("Creating Phys body({}) \n", obj.GetTag());
+
+            }
             std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
+            std::cout << "PhysObjects: " << physicsObjects.size() << std::endl;
             flag = true;
         }
+        RegisterColliders();
+    }
+
+    auto OnCollision2 = [](const Entity &other)
+    {
+            std::cout << "Debug \n";
+    };
+
+    void RegisterColliders()
+    {
+        for (Entity& entity : physicsObjects)
+        {
+            auto trans = entity.GetComponent<Transform>();
+            auto rigidbody = entity.GetComponent<Rigidbody>();
+            if (entity != nullptr)
+            {
+                std::string tag = entity.GetTag();
+                std::cout << tag;
+                rigidbody->SetColliderBounds(((trans->pos - trans->scale) / 2), (trans->pos + trans->scale / 2));
+                entity.RegisterCollisionHandler(OnCollision2);
+            }
+            
+            
+        }
+            
+            
     }
 
     void SpawnStuff()
     {
-
         //this draws all the objects(cubes rn cos im retarded)
         for (Entity& obj : liveObjects)
         {
@@ -116,6 +164,7 @@ namespace Game {
             if (obj == &cube1)
             {
                 objTransform->pos.x = 0;
+                objTransform->pos.z = 10;
                 objTransform->pos.y = 0.2;
                 objRenderer->col = "F698BD";
             }
@@ -136,12 +185,16 @@ namespace Game {
         InitializePlayer();
         InitializeObjects();
         SpawnStuff();
+        Rigidbody::ProcessPhysics(physicsObjects);
         MovePlayer();
+        
         entityInSight = player.GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
         //debug for raycasting
         if (entityInSight.GetTag() != "")
         {
-            std::cout << entityInSight.GetTag() << std::endl;
+            //BoxCollider* coll = &entityInSight.GetComponent<Rigidbody>()->collider;
+           // if(coll)std::cout << entityInSight.GetTag() << std::endl;
+            
         }
 
         mainCamera.pos.y = 0.2;
@@ -152,19 +205,59 @@ namespace Game {
     void MovePlayer() {
         // Movement controls
         if (GetAsyncKeyState('A')) {
-            mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
+            if (!IsCollisionInDirection(mainCamera.Right())) {
+                mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
+            }
         }
         if (GetAsyncKeyState('D')) {
-            mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
+            if (!IsCollisionInDirection(-mainCamera.Right())) {
+                mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
+            }
         }
         if (GetAsyncKeyState('W')) {
-            mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
+            if (!IsCollisionInDirection(mainCamera.Forward())) {
+                mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
+            }
         }
         if (GetAsyncKeyState('S')) {
-            mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
+            if (!IsCollisionInDirection(-mainCamera.Forward())) {
+                mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
+            }
         }
 
-        //std::cout << Vec3::Magnitude(mainCamera.pos) << std::endl;
+        // Debug 
+        auto playerTransform = playerEntity.GetComponent<Transform>();
+        if (playerTransform)
+        {
+            std::cout << "mainCamera Position: " << mainCamera.pos << " playerEntity Transform Position: " << playerTransform->pos << std::endl;
+
+        }
+    }
+
+
+    bool IsCollisionInDirection(const Vec3& direction)
+    {
+        // Calculate the potential new position after movement
+        Vec3 newPosition = mainCamera.pos + direction * movementSpeed * deltaTime;
+
+        // Check for collisions
+        for (Entity& object : liveObjects) {
+            auto transformComponent = object.GetComponent<Transform>();
+            auto rigidbodyComponent = object.GetComponent<Rigidbody>();
+
+            if (transformComponent && rigidbodyComponent)
+            {
+                if (rigidbodyComponent->IsLineIntersecting(mainCamera.pos, newPosition, *transformComponent)) {
+                    std::cout << "Collision detected with object: " << object.GetTag() << std::endl;
+                    std::cout << "Current Position: (" << mainCamera.pos.x << ", " << mainCamera.pos.y << ", " << mainCamera.pos.z << ")" << std::endl;
+                    std::cout << "New Position: (" << newPosition.x << ", " << newPosition.y << ", " << newPosition.z << ")" << std::endl;
+                    std::cout << "Object Position: (" << transformComponent->pos.x << ", " << transformComponent->pos.y << ", " << transformComponent->pos.z << ")" << std::endl;
+                    return true;
+                }
+                std::cout << "no hit \n";
+            }
+        }
+        return false;
     }
 
 

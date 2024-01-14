@@ -11,7 +11,6 @@ bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, Transform
     Vec3 minBounds = transformComponent.pos - Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
     Vec3 maxBounds = transformComponent.pos + Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
 
-
     float tMin = 0.0f;
     float tMax = std::numeric_limits<float>::infinity();
 
@@ -36,8 +35,6 @@ bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, Transform
     return true;
 }
 
-
-
 Entity Rigidbody::Raycast(Transform raycastStart, float dist, std::vector<Entity>& liveObjects) {
     Vec3 raycastDirection = raycastStart.Forward();
     Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
@@ -52,4 +49,52 @@ Entity Rigidbody::Raycast(Transform raycastStart, float dist, std::vector<Entity
     return Entity();
 }
 
+bool Rigidbody::BoxIntersect(BoxCollider a, BoxCollider b)
+{
+    return (
+        a.minBounds.x <= b.maxBounds.x &&
+        a.maxBounds.x >= b.minBounds.x &&
+        a.minBounds.y <= b.maxBounds.y &&
+        a.maxBounds.y >= b.minBounds.y &&
+        a.minBounds.z <= b.maxBounds.z &&
+        a.maxBounds.z >= b.minBounds.z
+        );
+}
+
+void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
+{
+    collider.minBounds = min;
+    collider.maxBounds = max;
+}
+
+
+
+void Rigidbody::ProcessPhysics(std::vector<Entity>& liveObjects)
+{
+    // Iterate through each pair of entities for potential collision detection
+    for (size_t i = 0; i < liveObjects.size(); ++i) {
+        for (size_t j = i + 1; j < liveObjects.size(); ++j) {
+            Entity& entityA = liveObjects[i];
+            Entity& entityB = liveObjects[j];
+
+            // Check if both entities have Rigidbody components
+            auto rigidbodyA = entityA.GetComponent<Rigidbody>();
+            auto rigidbodyB = entityB.GetComponent<Rigidbody>();
+
+            if (rigidbodyA && rigidbodyB) {
+
+                if (entityA.GetComponent<Rigidbody>()->canCollide && entityB.GetComponent<Rigidbody>()->canCollide) {
+                    auto transformA = rigidbodyA->collider;
+                    auto transformB = rigidbodyB->collider;
+
+                    if (Rigidbody::BoxIntersect(transformA, transformB))
+                    {
+                        entityA.OnCollision(entityB);
+                        entityB.OnCollision(entityA);
+                    }
+                }
+            }
+        }
+    }
+}
 

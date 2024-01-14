@@ -22,8 +22,14 @@ public:
 struct Rigidbody : public Component
 {
 public:
-	bool canCollide;
-	bool isTrigger;
+	BoxCollider collider;
+
+	bool canCollide = true;
+	bool isTrigger = false;
 	Entity Raycast(Transform raycastStart, float dist, std::vector<Entity>& liveObjects);
 	bool IsLineIntersecting(const Vec3& start, const Vec3& end, Transform& transformComponent);
+	static bool BoxIntersect(BoxCollider a, BoxCollider b);
+	static void ProcessPhysics(std::vector<Entity>& liveObjects);
+	void SetColliderBounds(const Vec3& min, const Vec3& max);
+
 };
