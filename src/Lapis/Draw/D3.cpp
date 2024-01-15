@@ -50,6 +50,25 @@ namespace Lapis::Draw::D3
 		Backend::PushVertex(Vec3(0.5, 0, -0.5), rgba, Vec2(1, 1), Vec3::up);
 	}
 
+	void DrawWireCube(const Vec3& minBounds, const Vec3& maxBounds, const Color& color)
+	{
+		
+		Line(Vec3(minBounds.x, minBounds.y, minBounds.z), Vec3(maxBounds.x, minBounds.y, minBounds.z), color);
+		Line(Vec3(maxBounds.x, minBounds.y, minBounds.z), Vec3(maxBounds.x, maxBounds.y, minBounds.z), color);
+		Line(Vec3(maxBounds.x, maxBounds.y, minBounds.z), Vec3(minBounds.x, maxBounds.y, minBounds.z), color);
+		Line(Vec3(minBounds.x, maxBounds.y, minBounds.z), Vec3(minBounds.x, minBounds.y, minBounds.z), color);
+
+		Line(Vec3(minBounds.x, minBounds.y, maxBounds.z), Vec3(maxBounds.x, minBounds.y, maxBounds.z), color);
+		Line(Vec3(maxBounds.x, minBounds.y, maxBounds.z), Vec3(maxBounds.x, maxBounds.y, maxBounds.z), color);
+		Line(Vec3(maxBounds.x, maxBounds.y, maxBounds.z), Vec3(minBounds.x, maxBounds.y, maxBounds.z), color);
+		Line(Vec3(minBounds.x, maxBounds.y, maxBounds.z), Vec3(minBounds.x, minBounds.y, maxBounds.z), color);
+
+		Line(Vec3(minBounds.x, minBounds.y, minBounds.z), Vec3(minBounds.x, minBounds.y, maxBounds.z), color);
+		Line(Vec3(maxBounds.x, minBounds.y, minBounds.z), Vec3(maxBounds.x, minBounds.y, maxBounds.z), color);
+		Line(Vec3(maxBounds.x, maxBounds.y, minBounds.z), Vec3(maxBounds.x, maxBounds.y, maxBounds.z), color);
+		Line(Vec3(minBounds.x, maxBounds.y, minBounds.z), Vec3(minBounds.x, maxBounds.y, maxBounds.z), color);
+	}
+
 	void Cube(Lapis::Transform transform, Color rgba)
 	{
 		Backend::PushCommand(LapisCommand(8, D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, transform, "UNLIT3D"));
@@ -73,6 +92,7 @@ namespace Lapis::Draw::D3
 		Backend::PushVertex(Vertex(Vec3(0.5, 0.5, 0.5), rgba, Vec2(0, 1), Vec3()));
 		Backend::PushVertex(Vertex(Vec3(0.5, -0.5, 0.5), rgba, Vec2(1, 1), Vec3()));
 	}
+
 	void Icosahedron(Transform transform, Color rgba)
 	{
 		{

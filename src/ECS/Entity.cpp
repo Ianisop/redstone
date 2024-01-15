@@ -1,6 +1,6 @@
 #include "Entity.h"
 
-bool Entity::operator==(Entity* other)
+bool Entity::operator==(const Entity* other) const
 {
 	if (other->GetTag() == this->tag)
 	{
@@ -8,7 +8,7 @@ bool Entity::operator==(Entity* other)
 	}
 	return false;
 }
-bool Entity::operator!=(Entity* other)
+bool Entity::operator!=(const Entity* other) const
 {
 	if (other->GetTag() != this->tag)
 	{
@@ -16,3 +16,5 @@ bool Entity::operator!=(Entity* other)
 	}
 	return false;
 }
+
+

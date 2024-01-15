@@ -14,6 +14,7 @@ namespace Game
 	void MovePlayer();
 	bool IsCollisionInDirection(const Vec3& direction);
 	void RegisterColliders();
-
+	Vec3 CalculatePushbackVector(const Vec3& newPosition, const Vec3& minBounds, const Vec3& maxBounds);
+	bool IsPointInBounds(const Vec3& point, const Vec3& minBounds, const Vec3& maxBounds);
 
 }
