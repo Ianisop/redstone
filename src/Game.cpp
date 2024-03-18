@@ -40,10 +40,12 @@ namespace Game {
     Entity cube1("cube1");
     Entity entityInSight("raycastHit");
     Entity player("player");
+    bool debug = false;
+
 
 
     //TIMERS
-    Timer spawner(2);
+    //Timer spawner(2);
 
     // MISC
     std::random_device rd;
@@ -53,12 +55,11 @@ namespace Game {
         auto transformComponent = entity.GetComponent<Transform>();
         auto rigidbodyComponent = entity.GetComponent<Rigidbody>();
 
-        if (transformComponent && rigidbodyComponent) {
-            if (!IsCollisionInDirection(entity.GetComponent<Transform>()->Forward()))
-            {
-                transformComponent->pos += direction * movementSpeed * deltaTime;
-            }
+        if (transformComponent && rigidbodyComponent)
+        {
+          transformComponent->pos += direction * movementSpeed * deltaTime;
         }
+        
     }
 
     float RandomFloat(float min, float max) {
@@ -109,34 +110,11 @@ namespace Game {
             }
             std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
             std::cout << "PhysObjects: " << physicsObjects.size() << std::endl;
+            RegisterColliders();
             flag = true;
+           
         }
-        RegisterColliders();
-    }
 
-    auto OnCollision2 = [](const Entity &other)
-    {
-            std::cout << "Debug \n";
-    };
-
-    void RegisterColliders()
-    {
-        for (Entity& entity : physicsObjects)
-        {
-            auto trans = entity.GetComponent<Transform>();
-            auto rigidbody = entity.GetComponent<Rigidbody>();
-            if (entity != nullptr)
-            {
-                std::string tag = entity.GetTag();
-                std::cout << tag;
-                rigidbody->SetColliderBounds(((trans->pos - trans->scale) / 2), (trans->pos + trans->scale / 2));
-                entity.RegisterCollisionHandler(OnCollision2);
-            }
-            
-            
-        }
-            
-            
     }
 
     void SpawnStuff()
@@ -179,7 +157,7 @@ namespace Game {
 
     }
 
-
+    // UPDATE LOOP
     void Run()
     {
         InitializePlayer();
@@ -187,7 +165,7 @@ namespace Game {
         SpawnStuff();
         Rigidbody::ProcessPhysics(physicsObjects);
         MovePlayer();
-        
+
         entityInSight = player.GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
         //debug for raycasting
         if (entityInSight.GetTag() != "")
@@ -202,27 +180,33 @@ namespace Game {
         
     }
 
-    void MovePlayer() {
+    void MovePlayer()
+    {
         // Movement controls
-        if (GetAsyncKeyState('A')) {
-            if (!IsCollisionInDirection(mainCamera.Right())) {
+        if (GetAsyncKeyState('A')) 
+        {
                 mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
-            }
+            
         }
-        if (GetAsyncKeyState('D')) {
-            if (!IsCollisionInDirection(-mainCamera.Right())) {
+        if (GetAsyncKeyState('D')) 
+        {
                 mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
-            }
+           
         }
-        if (GetAsyncKeyState('W')) {
-            if (!IsCollisionInDirection(mainCamera.Forward())) {
+        if (GetAsyncKeyState('W')) 
+        {
                 mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
-            }
+            
         }
-        if (GetAsyncKeyState('S')) {
-            if (!IsCollisionInDirection(-mainCamera.Forward())) {
+        if (GetAsyncKeyState('S')) 
+        {
                 mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
-            }
+            
+        }
+        if (GetAsyncKeyState('F'))
+        {
+            debug = !debug;
+            
         }
 
         // Debug 
@@ -234,31 +218,34 @@ namespace Game {
         }
     }
 
-
-    bool IsCollisionInDirection(const Vec3& direction)
+    // takes care of setting up box colliders for now
+    void RegisterColliders()
     {
-        // Calculate the potential new position after movement
-        Vec3 newPosition = mainCamera.pos + direction * movementSpeed * deltaTime;
-
-        // Check for collisions
-        for (Entity& object : liveObjects) {
-            auto transformComponent = object.GetComponent<Transform>();
-            auto rigidbodyComponent = object.GetComponent<Rigidbody>();
-
-            if (transformComponent && rigidbodyComponent)
+        for (int i = 0; i < physicsObjects.size();i++)
+        {
+            auto trans = physicsObjects[i].GetComponent<Transform>();
+            auto rigidbody = physicsObjects[i].GetComponent<Rigidbody>();
+            if (trans != nullptr && rigidbody != nullptr)
             {
-                if (rigidbodyComponent->IsLineIntersecting(mainCamera.pos, newPosition, *transformComponent)) {
-                    std::cout << "Collision detected with object: " << object.GetTag() << std::endl;
-                    std::cout << "Current Position: (" << mainCamera.pos.x << ", " << mainCamera.pos.y << ", " << mainCamera.pos.z << ")" << std::endl;
-                    std::cout << "New Position: (" << newPosition.x << ", " << newPosition.y << ", " << newPosition.z << ")" << std::endl;
-                    std::cout << "Object Position: (" << transformComponent->pos.x << ", " << transformComponent->pos.y << ", " << transformComponent->pos.z << ")" << std::endl;
-                    return true;
-                }
-                std::cout << "no hit \n";
+               //std::string tag = physicsObjects[i].GetTag();
+               //sprint(tag);
+               rigidbody->SetColliderBounds(((trans->pos - trans->scale) / 2), (trans->pos + trans->scale / 2));
+                
             }
+
         }
-        return false;
+        
+        std::cout << "Colliders Set up!\n";
+
     }
 
+    void DrawColliders()
+    {
+        for (int i = 0; i < physicsObjects.size(); i++)
+        {
+            auto transform = physicsObjects[i].GetComponent<Transform>();
+            Draw::D3::Cube(*transform, "ff0000");
 
+        }
+    }
 }

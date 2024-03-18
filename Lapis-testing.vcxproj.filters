@@ -12,6 +12,7 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\ECS\Components.cpp" />
+    <ClCompile Include="src\ECS\Collision.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\hsl-to-rgb.hpp" />

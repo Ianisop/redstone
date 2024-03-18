@@ -71,30 +71,6 @@ void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
 
 void Rigidbody::ProcessPhysics(std::vector<Entity>& liveObjects)
 {
-    // Iterate through each pair of entities for potential collision detection
-    for (size_t i = 0; i < liveObjects.size(); ++i) {
-        for (size_t j = i + 1; j < liveObjects.size(); ++j) {
-            Entity& entityA = liveObjects[i];
-            Entity& entityB = liveObjects[j];
 
-            // Check if both entities have Rigidbody components
-            auto rigidbodyA = entityA.GetComponent<Rigidbody>();
-            auto rigidbodyB = entityB.GetComponent<Rigidbody>();
-
-            if (rigidbodyA && rigidbodyB) {
-
-                if (entityA.GetComponent<Rigidbody>()->canCollide && entityB.GetComponent<Rigidbody>()->canCollide) {
-                    auto transformA = rigidbodyA->collider;
-                    auto transformB = rigidbodyB->collider;
-
-                    if (Rigidbody::BoxIntersect(transformA, transformB))
-                    {
-                        entityA.OnCollision(entityB);
-                        entityB.OnCollision(entityA);
-                    }
-                }
-            }
-        }
-    }
 }
 
