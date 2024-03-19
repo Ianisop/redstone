@@ -35,14 +35,14 @@ bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, Transform
     return true;
 }
 
-Entity Rigidbody::Raycast(Transform raycastStart, float dist, std::vector<Entity>& liveObjects) {
+Entity Rigidbody::Raycast(Transform raycastStart, float dist, const std::vector<std::shared_ptr<Entity>>& liveObjects) {
     Vec3 raycastDirection = raycastStart.Forward();
     Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
 
-    for (Entity& object : liveObjects) {
-        auto& transformComponent = *object.GetComponent<Transform>();
+    for (std::shared_ptr<Entity> object : liveObjects) {
+        auto transformComponent = *object->GetComponent<Transform>();
         if (IsLineIntersecting(raycastStart.pos, raycastEnd, transformComponent)) {
-            return object;
+            return *object;
         }
     }
 
@@ -69,8 +69,35 @@ void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
 
 
 
-void Rigidbody::ProcessPhysics(std::vector<Entity>& liveObjects)
+void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects)
 {
+    // Iterate through each pair of entities for potential collision detection
+    //std::cout << "Processing Physics for " << liveObjects.size() << " objects." << std::endl;
+    for (size_t i = 0; i < liveObjects.size(); ++i) {
+        for (size_t j = i + 1; j < liveObjects.size(); ++j) {
+            Entity* entityA = liveObjects[i].get();
+            Entity* entityB = liveObjects[j].get();
 
+            // Check if both entities have Rigidbody components
+            auto rigidbodyA = entityA->GetComponent<Rigidbody>();
+            auto rigidbodyB = entityB->GetComponent<Rigidbody>();
+
+            if (rigidbodyA && rigidbodyB)
+            {
+                if (rigidbodyA->canCollide && rigidbodyB->canCollide)
+                {
+                    auto transformA = rigidbodyA->collider;
+                    auto transformB = rigidbodyB->collider;
+
+                    if (Rigidbody::BoxIntersect(transformA, transformB))
+                    {
+                        //std::cout << "Collision \n";
+                        entityA->OnCollision(*entityB);
+                        entityB->OnCollision(*entityA);
+                    }
+                }
+            }
+        }
+    }
 }
 
