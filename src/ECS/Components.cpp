@@ -128,12 +128,13 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                                 closestVertex = vertex;
                             }
                         }
-
                         // Calculate direction from player to closest vertex
                         Vec3 pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
                         pushDirection.Normalize();
 
-                        player->GetComponent<Transform>()->pos += pushDirection * 1.2;
+                        // Move the player away from the collider along the push direction
+                        const float pushIntensity = 1/1000; // make it so it pushed back with equal force, netweon 2nd law or whatever
+                        player->GetComponent<Transform>()->pos += pushDirection * pushIntensity;
                     }
                 }
             }

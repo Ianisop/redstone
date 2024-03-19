@@ -52,16 +52,6 @@ namespace Game {
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    void MoveEntity(Entity& entity, const Vec3& direction) {
-        auto transformComponent = entity.GetComponent<Transform>();
-        auto rigidbodyComponent = entity.GetComponent<Rigidbody>();
-
-        if (transformComponent && rigidbodyComponent)
-        {
-          transformComponent->pos += direction * movementSpeed * deltaTime;
-        }
-        
-    }
 
     float RandomFloat(float min, float max) {
         std::uniform_real_distribution<float> dis(min, max);
@@ -71,9 +61,9 @@ namespace Game {
     void InitializePlayer()
     {
         player->AddComponent<Transform>();
-        *player->GetComponent<Transform>() = mainCamera;
         player->GetComponent<Transform>()->scale.x = 0.1;
         player->GetComponent<Transform>()->scale.z = 0.1;
+        player->GetComponent<Transform>()->scale.y = 0.3;
     }
 
 
@@ -95,6 +85,7 @@ namespace Game {
             physicsObjects.push_back(player);
             physicsObjects.push_back(cube2);
             physicsObjects.push_back(cube1);
+           // physicsObjects.push_back(ground);
 
            
 
@@ -162,7 +153,7 @@ namespace Game {
             flag = true;
            
         }
-
+        mainCamera.pos = player->GetComponent<Transform>()->pos;
     }
 
     void Blip()
@@ -190,19 +181,24 @@ namespace Game {
         UpdateColliders();
         Rigidbody::ProcessPhysics(physicsObjects);
         MovePlayer();
-        DrawColliders();
-        entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
+
+        // entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
         //debug for raycasting
-        if (entityInSight->GetTag() != "")
-        {
+        //if (entityInSight->GetTag() != "")
+        //{
             //BoxCollider* coll = &entityInSight.GetComponent<Rigidbody>()->collider;
            // if(coll)std::cout << entityInSight.GetTag() << std::endl;
             
-        }
+        //}
 
-        mainCamera.pos.y = 0.2;
+
+
+        if (debug)
+        {
+            DrawColliders();
+        }
         
-        
+        player->GetComponent<Transform>()->pos.y = 0.2;
     }
 
     void MovePlayer()
@@ -210,25 +206,25 @@ namespace Game {
         // Movement controls
         if (GetAsyncKeyState('A')) 
         {
-                mainCamera.pos -= mainCamera.Right() * movementSpeed * deltaTime;
+                player->GetComponent<Transform>()->pos -= mainCamera.Right() * movementSpeed * deltaTime;
             
         }
         if (GetAsyncKeyState('D')) 
         {
-                mainCamera.pos += mainCamera.Right() * movementSpeed * deltaTime;
+                player->GetComponent<Transform>()->pos += mainCamera.Right() * movementSpeed * deltaTime;
            
         }
         if (GetAsyncKeyState('W')) 
         {
-                mainCamera.pos += mainCamera.Forward() * movementSpeed * deltaTime;
+                player->GetComponent<Transform>()->pos += mainCamera.Forward() * movementSpeed * deltaTime;
             
         }
         if (GetAsyncKeyState('S')) 
         {
-                mainCamera.pos -= mainCamera.Forward() * movementSpeed * deltaTime;
+                player->GetComponent<Transform>()->pos -= mainCamera.Forward() * movementSpeed * deltaTime;
             
         }
-        if (GetAsyncKeyState('F'))
+        if (GetAsyncKeyState('F')&1)
         {
             debug = !debug;
             
