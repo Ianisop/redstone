@@ -1,15 +1,17 @@
 #include <iostream>
 #include "Components.h"
 #include "../Game.h"
+#include "../Lapis/Engine.h"
 
 #undef max
 #define maximum(a, b) ((a) > (b) ? (a) : (b))
 #define minimum(a, b) ((a) < (b) ? (a) : (b))
 
 
-bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, Transform& transformComponent) {
-    Vec3 minBounds = transformComponent.pos - Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
-    Vec3 maxBounds = transformComponent.pos + Vec3(transformComponent.scale.x / 2.0f, transformComponent.scale.y / 2.0f, transformComponent.scale.z / 2.0f);
+bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, std::shared_ptr<Transform> transformComponent)
+{
+    Vec3 minBounds = transformComponent->pos - Vec3(transformComponent->scale.x / 2.0f, transformComponent->scale.y / 2.0f, transformComponent->scale.z / 2.0f);
+    Vec3 maxBounds = transformComponent->pos + Vec3(transformComponent->scale.x / 2.0f, transformComponent->scale.y / 2.0f, transformComponent->scale.z / 2.0f);
 
     float tMin = 0.0f;
     float tMax = std::numeric_limits<float>::infinity();
@@ -40,7 +42,7 @@ std::shared_ptr<Entity> Rigidbody::Raycast(Transform raycastStart, float dist, s
     Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
 
     for (auto& object : liveObjects) {
-        auto& transformComponent = *object->GetComponent<Transform>();
+        auto transformComponent = object->GetComponent<Transform>();
         if (IsLineIntersecting(raycastStart.pos, raycastEnd, transformComponent)) {
             return object;
         }
@@ -133,8 +135,8 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                         pushDirection.Normalize();
 
                         // Move the player away from the collider along the push direction
-                        const float pushIntensity = 1/1000; // make it so it pushed back with equal force, netweon 2nd law or whatever
-                        player->GetComponent<Transform>()->pos += pushDirection * pushIntensity;
+                        const float pushIntensity = 2; // make it so it pushed back with equal force, netweon 2nd law or whatever
+                        player->GetComponent<Transform>()->pos += pushDirection * pushIntensity * Lapis::deltaTime;
                     }
                 }
             }

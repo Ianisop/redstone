@@ -34,7 +34,6 @@ namespace Game {
 
     // Other entities and components
     std::vector<std::shared_ptr<Entity>> physicsObjects;
-    std::vector<std::shared_ptr<Entity>> liveObjects;
 
     auto ground = std::make_shared<Entity>("");
     auto cube2 = std::make_shared<Entity>("cube2");
@@ -61,6 +60,7 @@ namespace Game {
     void InitializePlayer()
     {
         player->AddComponent<Transform>();
+        player->AddComponent<Rigidbody>();
         player->GetComponent<Transform>()->scale.x = 0.1;
         player->GetComponent<Transform>()->scale.z = 0.1;
         player->GetComponent<Transform>()->scale.y = 0.3;
@@ -73,16 +73,9 @@ namespace Game {
         if (flag != true)
         {
 
-            // OBJECTS IN SCENE GO HERE
-            liveObjects.push_back(cube2);
-            liveObjects.push_back(cube1);
-            liveObjects.push_back(ground);
-
-
-
-
             //physx objects
             physicsObjects.push_back(player);
+            physicsObjects.push_back(ground);
             physicsObjects.push_back(cube2);
             physicsObjects.push_back(cube1);
            // physicsObjects.push_back(ground);
@@ -92,27 +85,23 @@ namespace Game {
 
 
             //this adds comps
-            for (auto obj : liveObjects)
+            for (auto obj : physicsObjects)
             {
-                obj->AddComponent<Transform>();
-                obj->AddComponent<Renderer>();
+                if (obj != player)
+                {
+                    obj->AddComponent<Transform>();
+                    obj->AddComponent<Renderer>();
+                    if(obj != ground)obj->AddComponent<Rigidbody>();
+                    
+                }
+
+
 
                 std::cout << std::format("Creating entity({}) \n", obj->GetTag());
 
             }
 
-            for (auto obj : physicsObjects)
-            {
-                obj->AddComponent<Rigidbody>();
-
-                std::cout << std::format("Creating Phys body({}) \n", obj->GetTag());
-
-            }
-
             physicsObjects.reserve(physicsObjects.size()); // Reserve space for efficiency
-
-
-            std::cout << "LiveObjects: " << liveObjects.size() << std::endl;
             std::cout << "PhysObjects: " << physicsObjects.size() << std::endl;
             //RegisterColliders();
 
@@ -159,15 +148,17 @@ namespace Game {
     void Blip()
     {
         //this draws all the objects(cubes rn cos im retarded)
-        for (auto& obj : liveObjects)
+        for (auto obj : physicsObjects)
         {
             auto objTransform = obj->GetComponent<Transform>();
             auto objRenderer = obj->GetComponent<Renderer>();
 
              //std::cout << "Rendering cube with tag: " << obj.tag << std::endl;
-             if(obj != ground)Draw::D3::Cube(*objTransform.get(), objRenderer.get()->col);
-             if(obj == ground)Draw::D3::Plane(*objTransform.get(), objRenderer.get()->col);
-             
+            if (objTransform && objRenderer)
+            {
+                if (obj != ground)Draw::D3::Cube(*objTransform.get(), objRenderer.get()->col);
+                if (obj == ground)Draw::D3::Plane(*objTransform.get(), objRenderer.get()->col);
+            }
         }
 
     }
@@ -182,14 +173,13 @@ namespace Game {
         Rigidbody::ProcessPhysics(physicsObjects);
         MovePlayer();
 
-        // entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, liveObjects);
+        entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, physicsObjects);
         //debug for raycasting
-        //if (entityInSight->GetTag() != "")
-        //{
-            //BoxCollider* coll = &entityInSight.GetComponent<Rigidbody>()->collider;
-           // if(coll)std::cout << entityInSight.GetTag() << std::endl;
+        if (entityInSight->GetTag() != "player" && entityInSight->GetTag() != "")
+        {
+            std::cout << entityInSight->GetTag() << std::endl;
             
-        //}
+        }
 
 
 
@@ -264,6 +254,7 @@ namespace Game {
             auto rigidbody = physicsObjects[i]->GetComponent<Rigidbody>();
 
             //std::cout << physicsObjects[i].GetTag() << "\n";
+            if (!rigidbody) continue;
             Draw::D3::DrawWireCube(rigidbody->collider.minBounds, rigidbody->collider.maxBounds, "006400");
             
 
