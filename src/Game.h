@@ -12,8 +12,8 @@ namespace Game
 	void Move();
 	void SpawnStuff();
 	void MovePlayer();
+	void UpdateColliders();
 
-	void RegisterColliders();
 	void DrawColliders();
 
 

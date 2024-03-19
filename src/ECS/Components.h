@@ -29,7 +29,7 @@ public:
 	Entity Raycast(Transform raycastStart, float dist, std::vector<Entity>& liveObjects);
 	bool IsLineIntersecting(const Vec3& start, const Vec3& end, Transform& transformComponent);
 	static bool BoxIntersect(BoxCollider a, BoxCollider b);
-	static void ProcessPhysics(std::vector<Entity>& liveObjects);
+	static void ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects);
 	void SetColliderBounds(const Vec3& min, const Vec3& max);
 
 };

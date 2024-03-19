@@ -69,8 +69,52 @@ void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
 
 
 
-void Rigidbody::ProcessPhysics(std::vector<Entity>& liveObjects)
+void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects)
 {
+    std::shared_ptr<Entity> player; // Initialize player as a shared pointer
+
+    // Find the player entity in the liveObjects vector
+    for (const auto& entity : liveObjects) {
+        if (entity->GetTag() == "player") {
+            player = entity;
+            break; // Stop searching once player is found
+        }
+    }
+
+    if (!player) {
+        // Player not found, handle error or return
+        std::cerr << "Error: Player entity not found." << std::endl;
+        return;
+    }
+
+    for (size_t i = 0; i < liveObjects.size(); ++i) {
+        for (size_t j = i + 1; j < liveObjects.size(); ++j) {
+            Entity* entityA = liveObjects[i].get();
+            Entity* entityB = liveObjects[j].get();
+
+            // Print entity tags for debugging
+            //std::cout << "Processing entities: " << entityA->GetTag() << " and " << entityB->GetTag() << std::endl;
+
+            // Ensure that at least one of the entities is not the player entity
+            if ((entityA != player.get() || entityB != player.get())) {
+                auto rigidbodyA = entityA->GetComponent<Rigidbody>();
+                auto rigidbodyB = entityB->GetComponent<Rigidbody>();
+
+                if (rigidbodyA && rigidbodyB && rigidbodyA->canCollide && rigidbodyB->canCollide) {
+                    auto transformA = rigidbodyA->collider;
+                    auto transformB = rigidbodyB->collider;
+
+                    //if collide, then do something
+                    if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider))
+                    {
+
+                        std::cout << "Entities are colliding!: " << entityA->GetTag() << " and " << entityB->GetTag() << std::endl;
+                    }
+                }
+            }
+        }
+    }
 
 }
+
 
