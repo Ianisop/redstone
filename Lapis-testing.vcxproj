@@ -14,7 +14,6 @@
     <ClCompile Include="src\ECS\Collision.cpp" />
     <ClCompile Include="src\ECS\Components.cpp" />
     <ClCompile Include="src\ECS\Entity.cpp" />
-    <ClCompile Include="src\ECS\EventSystem.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Lapis\Draw\D2.cpp" />
     <ClCompile Include="src\Lapis\Draw\D3.cpp" />
@@ -29,7 +28,6 @@
     <ClInclude Include="src\ECS\Component.h" />
     <ClInclude Include="src\ECS\Components.h" />
     <ClInclude Include="src\ECS\Entity.h" />
-    <ClInclude Include="src\ECS\EventSystem.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Lapis\Backend.h" />
     <ClInclude Include="src\Lapis\Draw\D2.h" />

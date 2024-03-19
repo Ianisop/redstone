@@ -12,5 +12,4 @@ namespace Lapis::Draw::D3
 	void Plane(Lapis::Transform transform, Color rgba);
 	void Cube(Lapis::Transform transform, Color rgba);
 	void Icosahedron(Transform transform, Color rgba);
-	void DrawWireCube(const Vec3& minBounds, const Vec3& maxBounds, const Color& color);
 }
