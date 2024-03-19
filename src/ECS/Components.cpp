@@ -2,7 +2,7 @@
 #include "Components.h"
 #include "../Game.h"
 
-
+#undef max
 #define maximum(a, b) ((a) > (b) ? (a) : (b))
 #define minimum(a, b) ((a) < (b) ? (a) : (b))
 
@@ -35,18 +35,18 @@ bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, Transform
     return true;
 }
 
-Entity Rigidbody::Raycast(Transform raycastStart, float dist, std::vector<Entity>& liveObjects) {
+std::shared_ptr<Entity> Rigidbody::Raycast(Transform raycastStart, float dist, std::vector<std::shared_ptr<Entity>>& liveObjects) {
     Vec3 raycastDirection = raycastStart.Forward();
     Vec3 raycastEnd = raycastStart.pos + raycastDirection * dist;
 
-    for (Entity& object : liveObjects) {
-        auto& transformComponent = *object.GetComponent<Transform>();
+    for (auto& object : liveObjects) {
+        auto& transformComponent = *object->GetComponent<Transform>();
         if (IsLineIntersecting(raycastStart.pos, raycastEnd, transformComponent)) {
             return object;
         }
     }
 
-    return Entity();
+    return nullptr;
 }
 
 bool Rigidbody::BoxIntersect(BoxCollider a, BoxCollider b)
@@ -66,7 +66,6 @@ void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
     collider.minBounds = min;
     collider.maxBounds = max;
 }
-
 
 
 void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects)
@@ -92,9 +91,6 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
             Entity* entityA = liveObjects[i].get();
             Entity* entityB = liveObjects[j].get();
 
-            // Print entity tags for debugging
-            //std::cout << "Processing entities: " << entityA->GetTag() << " and " << entityB->GetTag() << std::endl;
-
             // Ensure that at least one of the entities is not the player entity
             if ((entityA != player.get() || entityB != player.get())) {
                 auto rigidbodyA = entityA->GetComponent<Rigidbody>();
@@ -104,17 +100,46 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                     auto transformA = rigidbodyA->collider;
                     auto transformB = rigidbodyB->collider;
 
-                    //if collide, then do something
-                    if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider))
-                    {
+                    // Check for collision
+                    if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider)) {
+                        // If collision detected, handle it
+                        // Identify the vertices involved in the collision
+                        std::vector<Vec3> verticesA = {
+                            transformA.minBounds, // Front-bottom-left
+                            Vec3(transformA.minBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Front-bottom-right
+                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Front-top-left
+                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.maxBounds.z), // Front-top-right
+                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.minBounds.z), // Back-bottom-left
+                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Back-bottom-right
+                            Vec3(transformA.maxBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Back-top-left
+                            transformA.maxBounds // Back-top-right
+                        };
 
-                        std::cout << "Entities are colliding!: " << entityA->GetTag() << " and " << entityB->GetTag() << std::endl;
+                        
+
+                        // Compute distances from player to each vertex of entityA
+                        float minDistance = std::numeric_limits<float>::max();
+                        Vec3 closestVertex;
+
+                        for (const Vec3& vertex : verticesA) {
+                            float distance = Vec3::Distance(player->GetComponent<Transform>()->pos, vertex);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestVertex = vertex;
+                            }
+                        }
+
+                        // Calculate direction from player to closest vertex
+                        Vec3 pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
+                        pushDirection.Normalize();
+
+                        player->GetComponent<Transform>()->pos += pushDirection * 1.2;
                     }
                 }
             }
         }
     }
-
 }
+
 
 

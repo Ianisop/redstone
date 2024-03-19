@@ -57,8 +57,8 @@ public:
 
 
 
-    bool operator==(Entity other);
-    bool operator!=(Entity other);
+    bool operator==(const std::shared_ptr<Entity>& other);
+    bool operator!=(const std::shared_ptr<Entity>& other);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<Component>> components;

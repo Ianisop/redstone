@@ -10,7 +10,7 @@ namespace Game
 {
 	void Run();
 	void Move();
-	void SpawnStuff();
+	void Blip();
 	void MovePlayer();
 	void UpdateColliders();
 

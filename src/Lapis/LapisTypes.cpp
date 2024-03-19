@@ -214,6 +214,15 @@ namespace Lapis
 		return sqrtf(powf(a.x,2)+powf(a.y,2)+powf(a.z,2));
 	}
 
+	void Vec3::Normalize() {
+		float length = std::sqrt(x * x + y * y + z * z);
+		if (length != 0.0f) {
+			x /= length;
+			y /= length;
+			z /= length;
+		}
+	}
+
 	////////////////////// Vec4
 
 	Vec4 Lapis::Vec4::operator+(const Vec4& other) const

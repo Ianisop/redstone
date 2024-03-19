@@ -133,6 +133,7 @@ namespace Lapis
 			x(v2.x), y(v2.y), z(0)
 		{}
 
+		void Normalize();
 		static float Distance(Vec3 a, Vec3 b);
 		static float Magnitude(Vec3 a);
 
