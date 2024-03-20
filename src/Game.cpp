@@ -143,6 +143,7 @@ namespace Game {
            
         }
         mainCamera.pos = player->GetComponent<Transform>()->pos;
+        player->GetComponent<Transform>()->rot = mainCamera.rot;
     }
 
     void Blip()
@@ -171,7 +172,7 @@ namespace Game {
         Blip();
         UpdateColliders();
         Rigidbody::ProcessPhysics(physicsObjects);
-        MovePlayer();
+        Input();
 
         entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, physicsObjects);
         //debug for raycasting
@@ -191,29 +192,8 @@ namespace Game {
         player->GetComponent<Transform>()->pos.y = 0.2;
     }
 
-    void MovePlayer()
+    void Input()
     {
-        // Movement controls
-        if (GetAsyncKeyState('A')) 
-        {
-                player->GetComponent<Transform>()->pos -= mainCamera.Right() * movementSpeed * deltaTime;
-            
-        }
-        if (GetAsyncKeyState('D')) 
-        {
-                player->GetComponent<Transform>()->pos += mainCamera.Right() * movementSpeed * deltaTime;
-           
-        }
-        if (GetAsyncKeyState('W')) 
-        {
-                player->GetComponent<Transform>()->pos += mainCamera.Forward() * movementSpeed * deltaTime;
-            
-        }
-        if (GetAsyncKeyState('S')) 
-        {
-                player->GetComponent<Transform>()->pos -= mainCamera.Forward() * movementSpeed * deltaTime;
-            
-        }
         if (GetAsyncKeyState('F')&1)
         {
             debug = !debug;

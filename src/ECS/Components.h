@@ -23,7 +23,7 @@ struct Rigidbody : public Component
 {
 public:
 	BoxCollider collider;
-
+	Vec3 velocity;
 	bool canCollide = true;
 	bool isTrigger = false;
 	std::shared_ptr<Entity> Raycast(Transform raycastStart, float dist, std::vector<std::shared_ptr<Entity>>& liveObjects);

@@ -107,6 +107,7 @@ namespace Lapis
 		Vec3 operator+(const Vec3& other) const;
 		Vec3 operator-(const Vec3& other) const;
 		Vec3 operator*(const float& scalar) const;
+		
 		Vec3 operator/(const float& scalar) const;
 
 		Vec3& operator+=(const Vec3& other);
@@ -136,7 +137,8 @@ namespace Lapis
 		void Normalize();
 		static float Distance(Vec3 a, Vec3 b);
 		static float Magnitude(Vec3 a);
-
+		static Vec3 Cross(Vec3 a, Vec3 b);
+		static float Dot(Vec3 a, Vec3 b);
 		static const Vec3 up;
 		static const Vec3 right;
 		static const Vec3 forward;

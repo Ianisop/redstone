@@ -157,6 +157,7 @@ namespace Lapis
 		return res;
 	}
 
+
 	Vec3 Vec3::operator/(const float& scalar) const
 	{
 		Vec3 res;
@@ -214,6 +215,11 @@ namespace Lapis
 		return sqrtf(powf(a.x,2)+powf(a.y,2)+powf(a.z,2));
 	}
 
+	float Vec3::Dot(Vec3 a, Vec3 b)
+	{
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+
 	void Vec3::Normalize() {
 		float length = std::sqrt(x * x + y * y + z * z);
 		if (length != 0.0f) {
@@ -221,6 +227,14 @@ namespace Lapis
 			y /= length;
 			z /= length;
 		}
+	}
+
+	Vec3 Vec3::Cross(Vec3 a, Vec3 b) {
+		Vec3 result;
+		result.x = a.y * b.z - a.z * b.y;
+		result.y = a.z * b.x - a.x * b.z;
+		result.z = a.x * b.y - a.y * b.x;
+		return result;
 	}
 
 	////////////////////// Vec4

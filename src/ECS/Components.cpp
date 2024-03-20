@@ -6,7 +6,8 @@
 #undef max
 #define maximum(a, b) ((a) > (b) ? (a) : (b))
 #define minimum(a, b) ((a) < (b) ? (a) : (b))
-
+#define movementSpeed 2
+#define friction 0.2f
 
 bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, std::shared_ptr<Transform> transformComponent)
 {
@@ -70,11 +71,12 @@ void Rigidbody::SetColliderBounds(const Vec3& min, const Vec3& max)
 }
 
 
-void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects)
-{
-    std::shared_ptr<Entity> player; // Initialize player as a shared pointer
 
+
+
+void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects) {
     // Find the player entity in the liveObjects vector
+    std::shared_ptr<Entity> player;
     for (const auto& entity : liveObjects) {
         if (entity->GetTag() == "player") {
             player = entity;
@@ -82,12 +84,23 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
         }
     }
 
+    // Check if player entity was found
     if (!player) {
-        // Player not found, handle error or return
         std::cerr << "Error: Player entity not found." << std::endl;
         return;
     }
 
+    // Movement controls
+    if (GetAsyncKeyState('A'))
+        player->GetComponent<Rigidbody>()->velocity -= mainCamera.Right() * movementSpeed * deltaTime;
+    if (GetAsyncKeyState('D'))
+        player->GetComponent<Rigidbody>()->velocity += mainCamera.Right() * movementSpeed * deltaTime;
+    if (GetAsyncKeyState('W'))
+        player->GetComponent<Rigidbody>()->velocity += mainCamera.Forward() * movementSpeed * deltaTime;
+    if (GetAsyncKeyState('S'))
+        player->GetComponent<Rigidbody>()->velocity -= mainCamera.Forward() * movementSpeed * deltaTime;
+
+    // Handle collisions and apply pushback forces
     for (size_t i = 0; i < liveObjects.size(); ++i) {
         for (size_t j = i + 1; j < liveObjects.size(); ++j) {
             Entity* entityA = liveObjects[i].get();
@@ -98,51 +111,31 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                 auto rigidbodyA = entityA->GetComponent<Rigidbody>();
                 auto rigidbodyB = entityB->GetComponent<Rigidbody>();
 
+                // Check if both entities have rigidbody components and can collide
                 if (rigidbodyA && rigidbodyB && rigidbodyA->canCollide && rigidbodyB->canCollide) {
                     auto transformA = rigidbodyA->collider;
                     auto transformB = rigidbodyB->collider;
 
                     // Check for collision
                     if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider)) {
-                        // If collision detected, handle it
-                        // Identify the vertices involved in the collision
-                        std::vector<Vec3> verticesA = {
-                            transformA.minBounds, // Front-bottom-left
-                            Vec3(transformA.minBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Front-bottom-right
-                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Front-top-left
-                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.maxBounds.z), // Front-top-right
-                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.minBounds.z), // Back-bottom-left
-                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Back-bottom-right
-                            Vec3(transformA.maxBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Back-top-left
-                            transformA.maxBounds // Back-top-right
-                        };
+                        // Calculate collision normal
+                        Vec3 collisionNormal = (player->GetComponent<Rigidbody>()->velocity - transformA.minBounds);
+                        collisionNormal.Normalize();
 
-                        
+                        // Calculate magnitude of pushback force
+                        float forceMagnitude = Vec3::Dot(-player->GetComponent<Rigidbody>()->velocity, collisionNormal);
 
-                        // Compute distances from player to each vertex of entityA
-                        float minDistance = std::numeric_limits<float>::max();
-                        Vec3 closestVertex;
+                        // Calculate pushback force using cross product
+                        Vec3 pushForce = Vec3::Cross(-player->GetComponent<Rigidbody>()->velocity, collisionNormal);
 
-                        for (const Vec3& vertex : verticesA) {
-                            float distance = Vec3::Distance(player->GetComponent<Transform>()->pos, vertex);
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                closestVertex = vertex;
-                            }
-                        }
-                        // Calculate direction from player to closest vertex
-                        Vec3 pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
-                        pushDirection.Normalize();
-
-                        // Move the player away from the collider along the push direction
-                        const float pushIntensity = 2; // make it so it pushed back with equal force, netweon 2nd law or whatever
-                        player->GetComponent<Transform>()->pos += pushDirection * pushIntensity * Lapis::deltaTime;
+                        // Apply pushback force to player's velocity
+                        player->GetComponent<Rigidbody>()->velocity += pushForce * deltaTime;
                     }
                 }
             }
         }
     }
+
+    // Update player position based on velocity
+    player->GetComponent<Transform>()->pos += player->GetComponent<Rigidbody>()->velocity * deltaTime;
 }
-
-
-

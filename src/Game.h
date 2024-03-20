@@ -9,11 +9,9 @@ using namespace Lapis;
 namespace Game
 {
 	void Run();
-	void Move();
 	void Blip();
-	void MovePlayer();
 	void UpdateColliders();
-
+	void Input();
 	void DrawColliders();
 
 
