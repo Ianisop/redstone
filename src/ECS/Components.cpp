@@ -7,10 +7,13 @@
 #define maximum(a, b) ((a) > (b) ? (a) : (b))
 #define minimum(a, b) ((a) < (b) ? (a) : (b))
 #define frictionConstant 0.02
+#define gravityModifier 1
 
 Vec3 pushDirection;
 Vec3 friction;
 float pushIntensity;
+
+
 
 bool Rigidbody::IsLineIntersecting(const Vec3& start, const Vec3& end, std::shared_ptr<Transform> transformComponent)
 {
@@ -113,7 +116,7 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
             {
                 auto rigidbodyA = entityA->GetComponent<Rigidbody>();
                 auto rigidbodyB = entityB->GetComponent<Rigidbody>();
-                if (rigidbodyA && rigidbodyB && rigidbodyA->canCollide && rigidbodyB->canCollide) {
+                if (rigidbodyA && rigidbodyB) {
                     auto colliderA = rigidbodyA->collider;
                     auto colliderB = rigidbodyB->collider;
                     // Check for collision
@@ -133,28 +136,36 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                             Vec3(colliderA.maxBounds.x, colliderA.maxBounds.y, colliderA.minBounds.z), // Back-top-left
                             colliderA.maxBounds // Back-top-right
                         };
-
-                        // Compute distances from player to each vertex of entityA
-                        float minDistance = std::numeric_limits<float>::max();
-                        Vec3 closestVertex;
-                        for (const Vec3& vertex : verticesA) {
-                            float distance = Vec3::Distance(player->GetComponent<Transform>()->pos, vertex);
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                closestVertex = vertex;
+                        if (rigidbodyA->canCollide && rigidbodyB->canCollide)
+                        {
+                            // Compute distances from player to each vertex of entityA
+                            float minDistance = std::numeric_limits<float>::max();
+                            Vec3 closestVertex;
+                            for (const Vec3& vertex : verticesA) {
+                                float distance = Vec3::Distance(player->GetComponent<Transform>()->pos, vertex);
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    closestVertex = vertex;
+                                }
                             }
+
+                            // Calculate direction from player to closest vertex
+                            pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
+                            pushDirection.Normalize();
+                            // Move the player away from the collider along the push direction
+                            const float pushIntensity = sqrtf(player->GetComponent<Rigidbody>()->velocity.Magnitude()); // make it so it pushed back with equal force, netweon 2nd law or whatever
+                            player->GetComponent<Rigidbody>()->velocity += pushDirection * pushIntensity;
                         }
-                        // Calculate direction from player to closest vertex
-                        pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
-                        pushDirection.Normalize();
-                        // Move the player away from the collider along the push direction
-                        const float pushIntensity = sqrtf(player->GetComponent<Rigidbody>()->velocity.Magnitude()); // make it so it pushed back with equal force, netweon 2nd law or whatever
-                        player->GetComponent<Rigidbody>()->velocity += pushDirection * pushIntensity;
+
                     }   
                 }
             }
         }
     }
+        
+    //apply gravity
+    if(!player->GetComponent<Rigidbody>()->grounded) player->GetComponent<Rigidbody>()->velocity = player->GetComponent<Rigidbody>()->velocity.y * gravityModifier * deltaTime;
+
 
     // Apply player input movement
     player->GetComponent<Rigidbody>()->velocity += movementVec;

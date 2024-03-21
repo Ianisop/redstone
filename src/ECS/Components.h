@@ -28,9 +28,10 @@ public:
 struct Rigidbody : public Component
 {
 public:
-	using CollisionCallback = std::function<void(const CollisionEvent&)>;
+	using CollisionCallback = std::function<void(const CollisionEvent)>;
 	BoxCollider collider;
 	Vec3 velocity;
+	bool grounded;
 	bool canCollide = true;
 	bool isTrigger = false;
 	std::shared_ptr<Entity> Raycast(Transform raycastStart, float dist, std::vector<std::shared_ptr<Entity>>& liveObjects);
@@ -53,13 +54,18 @@ public:
         
 
         // Invoke collision callbacks
-        for (const auto& callback : collisionCallbacks) {
-            callback(event);
-        }
+		if (event.entity1 && event.entity2)
+		{
+			for (const auto& callback : collisionCallbacks) {
+				callback(event);
+			}
+		}
+
     }
 
 	// Simulate collision detection and raise collision events
-	void SimulateCollision(std::shared_ptr<Entity> otherEntity) {
+	void SimulateCollision(std::shared_ptr<Entity> otherEntity)
+	{
 		CollisionEvent event{ otherEntity };
 		// Raise collision event for each registered callback
 		for (const auto& callback : collisionCallbacks) {

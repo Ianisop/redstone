@@ -42,7 +42,8 @@ namespace Game {
     
 
     //collision callbacks
-   // void OnPlayerCube1Collision(const CollisionEvent& callBack);
+    //void OnPlayerCube1Collision(const CollisionEvent& callBack);
+    //void GroundChecker(const CollisionEvent& callBack);
 
     
 
@@ -134,7 +135,7 @@ namespace Game {
              /////////?GROUND ///////
              //////////////////////
 
-             ground->GetComponent<Transform>()->pos.y = 0;
+             ground->GetComponent<Transform>()->pos.y = -0.1;
              ground->GetComponent<Transform>()->scale.x = 100;
              ground->GetComponent<Transform>()->scale.z = 100;
              ground->GetComponent<Renderer>()->col = "ffffff";
@@ -142,7 +143,7 @@ namespace Game {
 
 
 
-             SetupCollisionCallback();
+            SetupCollisionCallback();
             flag = true;
            
         }
@@ -191,7 +192,7 @@ namespace Game {
             DrawColliders();
         }
         
-        player->GetComponent<Transform>()->pos.y = 0.2;
+       // player->GetComponent<Transform>()->pos.y = 0.2;
     }
 
     void Input()
@@ -229,17 +230,23 @@ namespace Game {
 
     }
 
-    void OnPlayerCube1Collision(const CollisionEvent& callBack)
+    void OnPlayerCube1Collision(const CollisionEvent callBack)
     {
         std::cout << "Collision between player and cube1 detected!" << std::endl;
 
     }
 
+    void GroundChecker(const CollisionEvent callBack)
+    {
+        callBack.entity2->GetComponent<Rigidbody>()->grounded = true;
+
+    }
 
     //setups up callbacks
     void SetupCollisionCallback()
     {
         player->GetComponent<Rigidbody>()->AddCollisionCallback(OnPlayerCube1Collision);
+        ground->GetComponent<Rigidbody>()->AddCollisionCallback(GroundChecker);
     }
 
 
@@ -257,6 +264,7 @@ namespace Game {
 
         }
     }
+
 
 
 
