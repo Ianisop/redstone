@@ -135,8 +135,8 @@ namespace Lapis
 		{}
 
 		void Normalize();
+		float Magnitude();
 		static float Distance(Vec3 a, Vec3 b);
-		static float Magnitude(Vec3 a);
 		static Vec3 Cross(Vec3 a, Vec3 b);
 		static float Dot(Vec3 a, Vec3 b);
 		static const Vec3 up;

@@ -3,22 +3,17 @@
 #include "Entity.h"
 #include "../Lapis/LapisTypes.h"
 using namespace Lapis;
-
 struct BoxCollider
 {
 	Vec3 minBounds;
 	Vec3 maxBounds;
 };
-
-
 struct Renderer : public Component
 {
 public:
 	Color col = "ffffff";
-	
 
 };
-
 struct Rigidbody : public Component
 {
 public:
@@ -31,5 +26,4 @@ public:
 	static bool BoxIntersect(BoxCollider a, BoxCollider b);
 	static void ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects);
 	void SetColliderBounds(const Vec3& min, const Vec3& max);
-
 };

@@ -62,6 +62,13 @@ namespace Lapis::Draw::D3
 		Line(Vec3(maxBounds.x, minBounds.y, maxBounds.z), Vec3(maxBounds.x, maxBounds.y, maxBounds.z), color);
 		Line(Vec3(maxBounds.x, maxBounds.y, maxBounds.z), Vec3(minBounds.x, maxBounds.y, maxBounds.z), color);
 		Line(Vec3(minBounds.x, maxBounds.y, maxBounds.z), Vec3(minBounds.x, minBounds.y, maxBounds.z), color);
+		
+		Line(Vec3(minBounds.x, minBounds.y, minBounds.z), Vec3(maxBounds.x, maxBounds.y, maxBounds.z), color);//diagonal
+		Line(Vec3(maxBounds.x, minBounds.y, minBounds.z), Vec3(minBounds.x, maxBounds.y, maxBounds.z), color);//diagonal
+		Line(Vec3(minBounds.x, maxBounds.y, minBounds.z), Vec3(maxBounds.x, minBounds.y, maxBounds.z), color);//diagonal
+		Line(Vec3(maxBounds.x, maxBounds.y, minBounds.z), Vec3(minBounds.x, minBounds.y, maxBounds.z), color);//diagonal
+	
+
 
 		Line(Vec3(minBounds.x, minBounds.y, minBounds.z), Vec3(minBounds.x, minBounds.y, maxBounds.z), color);
 		Line(Vec3(maxBounds.x, minBounds.y, minBounds.z), Vec3(maxBounds.x, minBounds.y, maxBounds.z), color);

@@ -210,10 +210,6 @@ namespace Lapis
 		return sqrt(powf((b.x - a.x), 2)+powf((b.y - a.y),2)+powf((b.z-a.z),2));
 	}
 
-	float Vec3::Magnitude(Vec3 a)
-	{
-		return sqrtf(powf(a.x,2)+powf(a.y,2)+powf(a.z,2));
-	}
 
 	float Vec3::Dot(Vec3 a, Vec3 b)
 	{
@@ -227,6 +223,11 @@ namespace Lapis
 			y /= length;
 			z /= length;
 		}
+	}
+
+	float Vec3::Magnitude()
+	{
+		return std::sqrt(powf(this->x,2)+powf(this->y,2)+powf(this->z,2));
 	}
 
 	Vec3 Vec3::Cross(Vec3 a, Vec3 b) {

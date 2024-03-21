@@ -175,14 +175,12 @@ namespace Game {
         Input();
 
         entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, physicsObjects);
+
         //debug for raycasting
-        if (entityInSight->GetTag() != "player" && entityInSight->GetTag() != "")
+        if (entityInSight && debug && entityInSight->GetTag() != "player" && entityInSight->GetTag() != "")
         {
-            std::cout << entityInSight->GetTag() << std::endl;
-            
+            std::cout << entityInSight->GetTag() << std::endl;          
         }
-
-
 
         if (debug)
         {
