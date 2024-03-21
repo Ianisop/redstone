@@ -40,6 +40,9 @@ namespace Game {
     auto cube1 = std::make_shared<Entity>("cube1");
     auto entityInSight = std::make_shared<Entity>("raycastHit");
     
+
+    //collision callbacks
+    void OnPlayerCube1Collision(std::shared_ptr<Entity> cube1);
     
 
 
@@ -201,7 +204,7 @@ namespace Game {
 
     }
 
-    // takes care of setting up box colliders for now
+    // takes care of setting up box colliders and collision callbacks
     void UpdateColliders()
     {
         for (int i = 0; i < physicsObjects.size();i++)
@@ -219,11 +222,21 @@ namespace Game {
             }
 
         }
+
         
       // std::cout << "Colliders Set up!\n";
 
     }
 
+    void SetupCollisionCallback() {
+        player->GetComponent<Rigidbody>()->SetCollisionCallback(cube1, OnPlayerCube1Collision);
+    }
+
+    void OnPlayerCube1Collision(std::shared_ptr<Entity> cube1)
+    {
+        std::cout << "Collision between player and cube1 detected!" << std::endl;
+
+    }
 
     void DrawColliders()
     {
@@ -238,4 +251,7 @@ namespace Game {
 
         }
     }
+
+
+
 }

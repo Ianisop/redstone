@@ -113,7 +113,9 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                     auto transformB = rigidbodyB->collider;
                     // Check for collision
                     if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider)) {
-                        // If collision detected, handle it
+                        // Check if the collision involves the specific pair of entities
+
+                    
                         // Identify the vertices involved in the collision
                         std::vector<Vec3> verticesA = {
                             transformA.minBounds, // Front-bottom-left
@@ -140,9 +142,9 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                         pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
                         pushDirection.Normalize();
                         // Move the player away from the collider along the push direction
-                        const float pushIntensity = player->GetComponent<Rigidbody>()->velocity.Magnitude(); // make it so it pushed back with equal force, netweon 2nd law or whatever
+                        const float pushIntensity = sqrtf(player->GetComponent<Rigidbody>()->velocity.Magnitude())/2; // make it so it pushed back with equal force, netweon 2nd law or whatever
                         player->GetComponent<Rigidbody>()->velocity += pushDirection * pushIntensity;
-                    }
+                    }   
                 }
             }
         }
