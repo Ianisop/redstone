@@ -42,7 +42,8 @@ namespace Game {
     
 
     //collision callbacks
-    void OnPlayerCube1Collision(std::shared_ptr<Entity> cube1);
+   // void OnPlayerCube1Collision(const CollisionEvent& callBack);
+
     
 
 
@@ -141,7 +142,7 @@ namespace Game {
 
 
 
-
+             SetupCollisionCallback();
             flag = true;
            
         }
@@ -228,15 +229,20 @@ namespace Game {
 
     }
 
-    void SetupCollisionCallback() {
-        player->GetComponent<Rigidbody>()->SetCollisionCallback(cube1, OnPlayerCube1Collision);
-    }
-
-    void OnPlayerCube1Collision(std::shared_ptr<Entity> cube1)
+    void OnPlayerCube1Collision(const CollisionEvent& callBack)
     {
         std::cout << "Collision between player and cube1 detected!" << std::endl;
 
     }
+
+
+    //setups up callbacks
+    void SetupCollisionCallback()
+    {
+        player->GetComponent<Rigidbody>()->AddCollisionCallback(OnPlayerCube1Collision);
+    }
+
+
 
     void DrawColliders()
     {

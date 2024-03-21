@@ -5,23 +5,30 @@
 #include <unordered_map>
 
 using namespace Lapis;
+
+struct CollisionEvent 
+{
+	std::shared_ptr<Entity> entity1;
+	std::shared_ptr<Entity> entity2;
+	
+};
 struct BoxCollider
 {
 	Vec3 minBounds;
 	Vec3 maxBounds;
 };
+
 struct Renderer : public Component
 {
 public:
 	Color col = "ffffff";
 
 };
+
 struct Rigidbody : public Component
 {
 public:
-	using CollisionCallback = std::function<void(std::shared_ptr<Entity>)>;
-	static std::unordered_map<std::shared_ptr<Entity>, Rigidbody::CollisionCallback> collisionCallbacks;
-
+	using CollisionCallback = std::function<void(const CollisionEvent&)>;
 	BoxCollider collider;
 	Vec3 velocity;
 	bool canCollide = true;
@@ -32,16 +39,36 @@ public:
 	static void ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects);
 	void SetColliderBounds(const Vec3& min, const Vec3& max);
 
-	void SetCollisionCallback(std::shared_ptr<Entity> entity, Rigidbody::CollisionCallback callback)
+	// Add a collision callback listener
+	void AddCollisionCallback(CollisionCallback callback) {
+		collisionCallbacks.push_back(callback);
+	}   
+	void HandleCollision(std::shared_ptr<Entity> otherEntity)
 	{
-		collisionCallbacks[entity] = callback;
+        // Create collision event
+        CollisionEvent event;
+		
+		event.entity1 = this->GetParentEntity();
+        event.entity2 = otherEntity;
+        
+
+        // Invoke collision callbacks
+        for (const auto& callback : collisionCallbacks) {
+            callback(event);
+        }
+    }
+
+	// Simulate collision detection and raise collision events
+	void SimulateCollision(std::shared_ptr<Entity> otherEntity) {
+		CollisionEvent event{ otherEntity };
+		// Raise collision event for each registered callback
+		for (const auto& callback : collisionCallbacks) {
+			callback(event);
+		}
 	}
 
 
-
-
-
 private:
-	CollisionCallback collisionCallback; 
+	std::vector<CollisionCallback> collisionCallbacks;
 };
 

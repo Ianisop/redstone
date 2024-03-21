@@ -82,8 +82,12 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
         return;
     }
 
-    float movementSpeed = 10;
+    float movementSpeed = 100;
     Vec3 movementVec;
+    if (GetAsyncKeyState(VK_LSHIFT))
+    {
+        movementSpeed *= 1.5;
+    }
 
     // Calculate movement based on player input
     if (GetAsyncKeyState('A'))
@@ -102,30 +106,32 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
     // Collision handling
     for (size_t i = 0; i < liveObjects.size(); ++i) {
         for (size_t j = i + 1; j < liveObjects.size(); ++j) {
-            Entity* entityA = liveObjects[i].get();
-            Entity* entityB = liveObjects[j].get();
+            std::shared_ptr<Entity> entityA = liveObjects[i];
+            std::shared_ptr<Entity> entityB = liveObjects[j];
             // Ensure that at least one of the entities is not the player entity
-            if ((entityA != player.get() || entityB != player.get())) {
+            if ((entityA != player|| entityB != player))
+            {
                 auto rigidbodyA = entityA->GetComponent<Rigidbody>();
                 auto rigidbodyB = entityB->GetComponent<Rigidbody>();
                 if (rigidbodyA && rigidbodyB && rigidbodyA->canCollide && rigidbodyB->canCollide) {
-                    auto transformA = rigidbodyA->collider;
-                    auto transformB = rigidbodyB->collider;
+                    auto colliderA = rigidbodyA->collider;
+                    auto colliderB = rigidbodyB->collider;
                     // Check for collision
                     if (BoxIntersect(rigidbodyA->collider, rigidbodyB->collider)) {
-                        // Check if the collision involves the specific pair of entities
 
+                        rigidbodyA->HandleCollision(entityB);
+                        rigidbodyB->HandleCollision(entityA);
                     
                         // Identify the vertices involved in the collision
                         std::vector<Vec3> verticesA = {
-                            transformA.minBounds, // Front-bottom-left
-                            Vec3(transformA.minBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Front-bottom-right
-                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Front-top-left
-                            Vec3(transformA.minBounds.x, transformA.maxBounds.y, transformA.maxBounds.z), // Front-top-right
-                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.minBounds.z), // Back-bottom-left
-                            Vec3(transformA.maxBounds.x, transformA.minBounds.y, transformA.maxBounds.z), // Back-bottom-right
-                            Vec3(transformA.maxBounds.x, transformA.maxBounds.y, transformA.minBounds.z), // Back-top-left
-                            transformA.maxBounds // Back-top-right
+                            colliderA.minBounds, // Front-bottom-left
+                            Vec3(colliderA.minBounds.x, colliderA.minBounds.y, colliderA.maxBounds.z), // Front-bottom-right
+                            Vec3(colliderA.minBounds.x, colliderA.maxBounds.y, colliderA.minBounds.z), // Front-top-left
+                            Vec3(colliderA.minBounds.x, colliderA.maxBounds.y, colliderA.maxBounds.z), // Front-top-right
+                            Vec3(colliderA.maxBounds.x, colliderA.minBounds.y, colliderA.minBounds.z), // Back-bottom-left
+                            Vec3(colliderA.maxBounds.x, colliderA.minBounds.y, colliderA.maxBounds.z), // Back-bottom-right
+                            Vec3(colliderA.maxBounds.x, colliderA.maxBounds.y, colliderA.minBounds.z), // Back-top-left
+                            colliderA.maxBounds // Back-top-right
                         };
 
                         // Compute distances from player to each vertex of entityA
@@ -142,7 +148,7 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
                         pushDirection = closestVertex - player->GetComponent<Transform>()->pos;
                         pushDirection.Normalize();
                         // Move the player away from the collider along the push direction
-                        const float pushIntensity = sqrtf(player->GetComponent<Rigidbody>()->velocity.Magnitude())/2; // make it so it pushed back with equal force, netweon 2nd law or whatever
+                        const float pushIntensity = sqrtf(player->GetComponent<Rigidbody>()->velocity.Magnitude()); // make it so it pushed back with equal force, netweon 2nd law or whatever
                         player->GetComponent<Rigidbody>()->velocity += pushDirection * pushIntensity;
                     }   
                 }
@@ -156,5 +162,5 @@ void Rigidbody::ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects
     // Update player position based on velocity
     player->GetComponent<Transform>()->pos += player->GetComponent<Rigidbody>()->velocity * deltaTime;
 
-    std::cout << player->GetComponent<Rigidbody>()->velocity << " velocity|pos " << player->GetComponent<Transform>()->pos << std::endl;
+   // std::cout << player->GetComponent<Rigidbody>()->velocity << " velocity|pos " << player->GetComponent<Transform>()->pos << std::endl;
 }
