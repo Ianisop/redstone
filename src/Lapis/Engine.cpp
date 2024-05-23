@@ -85,21 +85,12 @@ namespace Lapis
 		return Backend::GetRenderTargetView();
 	}
 
-	void PushMaterial(Material* mat)
+	void PushMaterial(Material mat)
 	{
 		Backend::PushMaterial(mat);
 	}
 	void PopMaterial()
 	{
 		Backend::PopMaterial();
-	}
-
-	Material* FindBuiltinMaterial(std::string name)
-	{
-		auto it = Backend::builtinMaterials.find(name);
-
-		if (it != Backend::builtinMaterials.end())
-			return (Material*)Backend::builtinMaterials.at(name).get();
-		return nullptr;
 	}
 }

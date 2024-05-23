@@ -48,8 +48,6 @@ namespace Lapis::Backend
     std::vector<Vertex> LapisVertexVector{};
     std::vector<InternalLapisCommand> LapisCommandVector{};
 
-    std::vector<Material*> materialStack{};
-
     void InitBackend(IDXGISwapChain* _swapchain, HWND _hwnd)
     {
         initDuration = std::chrono::high_resolution_clock::now().time_since_epoch();
@@ -490,12 +488,7 @@ namespace Lapis::Backend
     }
     void PushCommand(LapisCommand lapisCommand)
     {
-        auto cmd = InternalLapisCommand(lapisCommand, VertexCount);
-        if (materialStack.size() > 0)
-        {
-            cmd.material = std::make_shared<InternalMaterial>(materialStack.at(materialStack.size() - 1));
-        }
-        LapisCommandVector.push_back(cmd);
+        LapisCommandVector.push_back(InternalLapisCommand(lapisCommand, VertexCount));
     }
 
     void UpdateGlobalConstantBuffer()
@@ -622,12 +615,12 @@ namespace Lapis::Backend
         return renderTargetView;
     }
 
-    void PushMaterial(Material* mat)
+    void PushMaterial(Material mat)
     {
-        materialStack.push_back(mat);
+
     }
     void PopMaterial()
     {
-        materialStack.pop_back();
+
     }
 }
