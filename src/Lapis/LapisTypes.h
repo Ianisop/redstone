@@ -292,4 +292,15 @@ namespace Lapis
 
 		static const mat4x4 Identity;
 	};
+
+	struct Quad
+	{
+		Vec3 a, b, c, d;
+	};
+
+
+	struct Material
+	{
+
+	};
 }

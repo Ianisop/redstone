@@ -34,6 +34,10 @@
 // include Utility headers
 #include "utils/hsl-to-rgb.hpp"
 
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_win32.h"
+#include "imgui/backends/imgui_impl_dx11.h"
+
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -136,6 +140,94 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         {
             using namespace Lapis;
             NewFrame();
+
+
+
+
+            ////std::cout << "mainCamera.pos : " << mainCamera.pos << "\n";
+            ////std::cout << "mainCamera.rot : " << mainCamera.rot << "\n";
+
+            if (GetAsyncKeyState('W')) mainCamera.pos += mainCamera.Forward() * deltaTime;
+            if (GetAsyncKeyState('S')) mainCamera.pos -= mainCamera.Forward() * deltaTime;
+            if (GetAsyncKeyState('A')) mainCamera.pos -= mainCamera.Right() * deltaTime;
+            if (GetAsyncKeyState('D')) mainCamera.pos += mainCamera.Right() * deltaTime;
+            if (GetAsyncKeyState('Q')) mainCamera.pos -= mainCamera.Up() * deltaTime;
+            if (GetAsyncKeyState('E')) mainCamera.pos += mainCamera.Up() * deltaTime;
+
+            if (GetAsyncKeyState(VK_RIGHT)) mainCamera.rot.yaw -= 90 * deltaTime;
+            if (GetAsyncKeyState(VK_LEFT))  mainCamera.rot.yaw += 90 * deltaTime;
+            if (GetAsyncKeyState(VK_DOWN)) mainCamera.rot.pitch -= 90 * deltaTime;
+            if (GetAsyncKeyState(VK_UP))  mainCamera.rot.pitch += 90 * deltaTime;
+            if (GetAsyncKeyState('Z')) mainCamera.rot.roll -= 90 * deltaTime;
+            if (GetAsyncKeyState('X'))  mainCamera.rot.roll += 90 * deltaTime;
+
+
+            Draw::D2::Circle(-5, 30, "00ff50");
+
+            static int checkerboardSize = 25;
+            Color col;
+            for (int i = 0; i < checkerboardSize; i++) {
+                for (int j = 0; j < checkerboardSize; j++) {
+                    if (((i % 2) + j) % 2 == 1)
+                        col = "707070";
+                    else
+                        col = "101010";
+                    Draw::D3::Plane(Transform(Vec3(i - checkerboardSize / 2, -2, j - checkerboardSize / 2), 0, 1), col);
+                }
+            }
+            
+            static auto transform = Transform(Vec3(0,-0.5,2), 0, 0.1);
+
+            if (GetAsyncKeyState(VK_NUMPAD4))
+            {
+                transform.rot.yaw += 20 * deltaTime;
+            }
+            if (GetAsyncKeyState(VK_NUMPAD6))
+            {
+                transform.rot.yaw -= 20 * deltaTime;
+            }
+            if (GetAsyncKeyState(VK_NUMPAD8))
+            {
+                transform.rot.pitch += 20 * deltaTime;
+            }
+            if (GetAsyncKeyState(VK_NUMPAD2))
+            {
+                transform.rot.pitch -= 20 * deltaTime;
+            }
+            if (GetAsyncKeyState(VK_NUMPAD7))
+            {
+                transform.rot.roll += 20 * deltaTime;
+            }
+            if (GetAsyncKeyState(VK_NUMPAD9))
+            {
+                transform.rot.roll -= 20 * deltaTime;
+            }
+
+            //transform.rot.pitch += 20 * deltaTime;
+
+            Draw::D3::Plane(transform, "ffffff90");
+            Draw::D3::Cube(transform, "ffffff90");
+            Draw::D3::Arrow(transform.pos, transform.Forward(), "0000ff");
+            Draw::D3::Arrow(transform.pos, transform.Right(), "ff0000");
+            Draw::D3::Arrow(transform.pos, transform.Up(), "00ff00");
+
+            
+            static bool once = false;
+            static Material mat{};
+            if (!once)
+            {
+                mat = *Lapis::FindBuiltinMaterial("UI");
+                ID3D11PixelShader* PS_shadertoytest;
+                device->CreatePixelShader(shadertoytest_pixel, sizeof(shadertoytest_pixel), 0, &PS_shadertoytest);
+                mat.pixelShader = PS_shadertoytest;
+                once = true;
+            }
+            PushMaterial(&mat);
+            Draw::D2::Rect(Vec4(100, 100, 200, 200), "ffffff");
+            PopMaterial();
+            
+            Draw::D2::String("yo", { 48,48 }, "ffffff", 12);
+
             RenderFrame();
             FlushFrame();
         }
