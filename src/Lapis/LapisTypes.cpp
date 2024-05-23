@@ -230,6 +230,11 @@ namespace Lapis
 		return std::sqrt(powf(this->x,2)+powf(this->y,2)+powf(this->z,2));
 	}
 
+	float Vec3::Length()
+	{
+		return std::sqrt(x * x + y * y + z * z);
+	}
+
 	Vec3 Vec3::Cross(Vec3 a, Vec3 b) {
 		Vec3 result;
 		result.x = a.y * b.z - a.z * b.y;

@@ -29,17 +29,26 @@ struct Rigidbody : public Component
 {
 public:
 	using CollisionCallback = std::function<void(const CollisionEvent)>;
-	BoxCollider collider;
+	Vec3 position;
 	Vec3 velocity;
-	bool grounded;
+	Vec3 acceleration;
+	float mass;
+	BoxCollider collider;
+	float restitution;
+	float frictionCoeff; //used for collision
+	float kineticFriction;
+	float staticFriction;
+	bool kinematic;
 	bool canCollide = true;
 	bool isTrigger = false;
-	std::shared_ptr<Entity> Raycast(Transform raycastStart, float dist, std::vector<std::shared_ptr<Entity>>& liveObjects);
-	bool IsLineIntersecting(const Vec3& start, const Vec3& end, std::shared_ptr<Transform> transformComponent);
-	static bool BoxIntersect(BoxCollider a, BoxCollider b);
-	static void ProcessPhysics(std::vector<std::shared_ptr<Entity>>& liveObjects);
-	void SetColliderBounds(const Vec3& min, const Vec3& max);
+	static constexpr Vec3 gravity = Vec3(0.0f, -9.81f, 0.0f); 
+	void ApplyForce(const Vec3& force);
+	void ApplyFriction();
 
+	static void ProcessPhysics(float steps, std::vector<std::shared_ptr<Entity>>& liveObjects);
+	void SetColliderBounds(const Vec3& min, const Vec3& max);
+	static void ResolveCollision(Rigidbody& rb1, Rigidbody& rb2);
+	static bool BoundingBoxCollision(const BoxCollider& box1, const BoxCollider& box2);
 	// Add a collision callback listener
 	void AddCollisionCallback(CollisionCallback callback) {
 		collisionCallbacks.push_back(callback);
@@ -76,5 +85,7 @@ public:
 
 private:
 	std::vector<CollisionCallback> collisionCallbacks;
+	static void Step(std::vector<std::shared_ptr<Entity>> liveObjects);
+
 };
 

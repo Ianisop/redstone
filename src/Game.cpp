@@ -35,6 +35,7 @@ namespace Game {
     // Other entities and components
     std::vector<std::shared_ptr<Entity>> physicsObjects;
 
+
     auto ground = std::make_shared<Entity>("");
     auto cube2 = std::make_shared<Entity>("cube2");
     auto cube1 = std::make_shared<Entity>("cube1");
@@ -66,6 +67,7 @@ namespace Game {
     {
         player->AddComponent<Transform>();
         player->AddComponent<Rigidbody>();
+        player->GetComponent<Rigidbody>()->mass = 5;
         player->GetComponent<Transform>()->scale.x = 0.1;
         player->GetComponent<Transform>()->scale.z = 0.1;
         player->GetComponent<Transform>()->scale.y = 0.3;
@@ -96,7 +98,8 @@ namespace Game {
                 {
                     obj->AddComponent<Transform>();
                     obj->AddComponent<Renderer>();
-                    if(obj != ground)obj->AddComponent<Rigidbody>();
+                    obj->AddComponent<Rigidbody>();
+                    obj->GetComponent<Rigidbody>()->mass = 1.0f;
                     
                 }
 
@@ -139,6 +142,17 @@ namespace Game {
              ground->GetComponent<Transform>()->scale.x = 100;
              ground->GetComponent<Transform>()->scale.z = 100;
              ground->GetComponent<Renderer>()->col = "ffffff";
+             ground->GetComponent<Rigidbody>()->kinematic = true;
+             for (auto obj : physicsObjects)
+             {
+                 auto rigidbody = obj->GetComponent<Rigidbody>();
+                 auto transform = obj->GetComponent<Transform>();
+                 if (rigidbody != nullptr && transform != nullptr)
+                 {
+                     rigidbody->position = transform->position;
+                 }
+
+             }
 
 
 
@@ -176,16 +190,8 @@ namespace Game {
         InitializeObjects();
         Blip();
         UpdateColliders();
-        Rigidbody::ProcessPhysics(physicsObjects);
+        Rigidbody::ProcessPhysics(5, physicsObjects);
         Input();
-
-        entityInSight = player->GetComponent<Rigidbody>()->Raycast(mainCamera, 2000, physicsObjects);
-
-        //debug for raycasting
-        if (entityInSight && debug && entityInSight->GetTag() != "player" && entityInSight->GetTag() != "")
-        {
-            std::cout << entityInSight->GetTag() << std::endl;          
-        }
 
         if (debug)
         {
@@ -201,6 +207,26 @@ namespace Game {
         {
             debug = !debug;
             
+        }
+        if (GetAsyncKeyState('G') & 1)
+        {
+            cube1->GetComponent<Rigidbody>()->ApplyForce(Vec3(2,0,0));
+        }
+        if (GetAsyncKeyState('W'))
+        {
+            player->GetComponent<Rigidbody>()->ApplyForce(mainCamera.Forward() * movementSpeed);
+        }
+        if (GetAsyncKeyState('A'))
+        {
+            player->GetComponent<Rigidbody>()->ApplyForce(-mainCamera.Right() * movementSpeed);
+        }
+        if (GetAsyncKeyState('S'))
+        {
+            player->GetComponent<Rigidbody>()->ApplyForce(-mainCamera.Forward() * movementSpeed);
+        }
+        if (GetAsyncKeyState('D'))
+        {
+            player->GetComponent<Rigidbody>()->ApplyForce(mainCamera.Right() * movementSpeed);
         }
 
 
@@ -235,18 +261,11 @@ namespace Game {
         std::cout << "Collision between player and cube1 detected!" << std::endl;
 
     }
-
-    void GroundChecker(const CollisionEvent callBack)
-    {
-        callBack.entity2->GetComponent<Rigidbody>()->grounded = true;
-
-    }
-
     //setups up callbacks
     void SetupCollisionCallback()
     {
         player->GetComponent<Rigidbody>()->AddCollisionCallback(OnPlayerCube1Collision);
-        ground->GetComponent<Rigidbody>()->AddCollisionCallback(GroundChecker);
+
     }
 
 
