@@ -44,7 +44,7 @@ public:
 	static constexpr Vec3 gravity = Vec3(0.0f, -9.81f, 0.0f); 
 	void ApplyForce(const Vec3& force);
 	void ApplyFriction();
-
+	void ApplyDamping();
 	static void ProcessPhysics(float steps, std::vector<std::shared_ptr<Entity>>& liveObjects);
 	void SetColliderBounds(const Vec3& min, const Vec3& max);
 	static void ResolveCollision(Rigidbody& rb1, Rigidbody& rb2);
