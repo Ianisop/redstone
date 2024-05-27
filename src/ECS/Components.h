@@ -32,6 +32,7 @@ public:
 	Vec3 position;
 	Vec3 velocity;
 	Vec3 acceleration;
+	bool isSleeping;
 	float mass;
 	BoxCollider collider;
 	float restitution;
@@ -45,14 +46,18 @@ public:
 	void ApplyForce(const Vec3& force);
 	void ApplyFriction();
 	void ApplyDamping();
+	void CheckSleep();
 	static void ProcessPhysics(float steps, std::vector<std::shared_ptr<Entity>>& liveObjects);
 	void SetColliderBounds(const Vec3& min, const Vec3& max);
 	static void ResolveCollision(Rigidbody& rb1, Rigidbody& rb2);
 	static bool BoundingBoxCollision(const BoxCollider& box1, const BoxCollider& box2);
+	static void PositionalCorrection(Rigidbody& rb1, Rigidbody& rb2, const Vec3& collisionNormal);
+	static float CalculatePenetrationDepth(const BoxCollider& box1, const BoxCollider& box2, const Vec3& normal);
 	// Add a collision callback listener
 	void AddCollisionCallback(CollisionCallback callback) {
 		collisionCallbacks.push_back(callback);
 	}   
+
 	void HandleCollision(std::shared_ptr<Entity> otherEntity)
 	{
         // Create collision event
