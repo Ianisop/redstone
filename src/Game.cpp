@@ -31,13 +31,13 @@ namespace Game {
 
     // Player entity stuff
     auto player = std::make_shared<Entity>("player");
-    float movementSpeed = 14;
+    float movementSpeed = 50;
 
     // Other entities and components
     std::vector<std::shared_ptr<Entity>> physicsObjects;
 
 
-    auto ground = std::make_shared<Entity>("");
+    auto ground = std::make_shared<Entity>("ground");
     auto cube2 = std::make_shared<Entity>("cube2");
     auto cube1 = std::make_shared<Entity>("cube1");
     auto entityInSight = std::make_shared<Entity>("raycastHit");
@@ -66,41 +66,42 @@ namespace Game {
 
     void InitializePlayer()
     {
-        player->AddComponent<Transform>();
-        player->AddComponent<Rigidbody>();
-        player->GetComponent<Rigidbody>()->mass = 1;
-        player->GetComponent<Rigidbody>()->position = Vec3(0, 2, 0);
-        player->GetComponent<Transform>()->scale.x = 0.1;
-        player->GetComponent<Transform>()->scale.z = 0.1;
-        player->GetComponent<Transform>()->scale.y = 0.3;
+        if (flag != true)
+        {
+            player->AddComponent<Transform>();
+            player->AddComponent<Rigidbody>();
+            player->GetComponent<Rigidbody>()->mass = 1;
+            player->GetComponent<Rigidbody>()->position = Vec3(0, 1, 0);
+            player->GetComponent<Transform>()->scale.x = 0.1;
+            player->GetComponent<Transform>()->scale.z = 0.1;
+            player->GetComponent<Transform>()->scale.y = 0.3;
+        }
+
     }
 
 
     //this is basically the start function
     void InitializeObjects() {
-        if (flag != true) {
-            // Physx objects
+        if (!flag) {
             physicsObjects.push_back(player);
             physicsObjects.push_back(ground);
             physicsObjects.push_back(cube2);
             physicsObjects.push_back(cube1);
 
-            // Add components to objects
             for (auto obj : physicsObjects) {
                 if (obj != player) {
                     obj->AddComponent<Transform>();
                     obj->AddComponent<Renderer>();
                     obj->AddComponent<Rigidbody>();
                     obj->GetComponent<Rigidbody>()->mass = 1.0f;
+                    obj->GetComponent<Rigidbody>()->canCollide = true;
+                    obj->GetComponent<Rigidbody>()->kinematic = false;
                 }
                 std::cout << std::format("Creating entity({}) \n", obj->GetTag());
             }
 
-            physicsObjects.reserve(physicsObjects.size()); // Reserve space for efficiency
-            std::cout << "PhysObjects: " << physicsObjects.size() << std::endl;
-
-            // Set up objects
-            cube1->GetComponent<Transform>()->pos = Vec3(5,2, 0);
+            cube1->GetComponent<Transform>()->pos = Vec3(0, 0, 0);
+            cube1->GetComponent<Transform>()->scale = Vec3(100, 0.1, 100);
             cube1->GetComponent<Rigidbody>()->kinematic = true;
             cube1->GetComponent<Renderer>()->col = "ffffff";
 
@@ -108,10 +109,10 @@ namespace Game {
             cube2->GetComponent<Renderer>()->col = "613513";
 
             ground->GetComponent<Transform>()->pos = Vec3(0, 0, 0);
-            ground->GetComponent<Transform>()->scale = Vec3(100, 1, 100);
+            ground->GetComponent<Transform>()->scale = Vec3(0, 0, 0);
             ground->GetComponent<Renderer>()->col = "ffffff";
             ground->GetComponent<Rigidbody>()->kinematic = true;
-            ground->GetComponent<Rigidbody>()->position = Vec3(0, -0.1, 0);
+            ground->GetComponent<Rigidbody>()->position = Vec3(0, 0, 0);
 
             for (auto obj : physicsObjects) {
                 auto rigidbody = obj->GetComponent<Rigidbody>();
@@ -131,6 +132,7 @@ namespace Game {
         player->GetComponent<Transform>()->rot = mainCamera.rot;
     }
 
+
     void Blip()
     {
         //this draws all the objects(cubes rn cos im retarded)
@@ -142,8 +144,8 @@ namespace Game {
              //std::cout << "Rendering cube with tag: " << obj.tag << std::endl;
             if (objTransform && objRenderer)
             {
-                if (obj != ground)Draw::D3::Cube(*objTransform.get(), objRenderer.get()->col);
-                if (obj == ground)Draw::D3::Plane(*objTransform.get(), objRenderer.get()->col);
+                Draw::D3::Cube(*objTransform.get(), objRenderer.get()->col);
+                
             }
         }
 
@@ -156,7 +158,7 @@ namespace Game {
         InitializeObjects();
         UpdateColliders();
         Blip();
-        if (!firstFrame) Rigidbody::ProcessPhysics(60, physicsObjects);
+        Rigidbody::ProcessPhysics(60, physicsObjects);
         
         Input();
 
@@ -170,9 +172,13 @@ namespace Game {
     }
 
     void Input() {
+
         if (GetAsyncKeyState('F') & 1) {
             debug = !debug;
+            player->GetComponent<Rigidbody>()->canCollide = !player->GetComponent<Rigidbody>()->canCollide;
+            player->GetComponent<Rigidbody>()->kinematic = !player->GetComponent<Rigidbody>()->kinematic;
         }
+
         if (GetAsyncKeyState('G') & 1) {
             cube1->GetComponent<Rigidbody>()->ApplyForce(Vec3(2, 0, 0));
         }
@@ -190,6 +196,7 @@ namespace Game {
 
         if (GetAsyncKeyState('W')) {
             player->GetComponent<Rigidbody>()->ApplyForce(forward * movementSpeed);
+           // std::cout << player->GetComponent<Rigidbody>()->position << "\n";
         }
         if (GetAsyncKeyState('A')) {
             player->GetComponent<Rigidbody>()->ApplyForce(-right * movementSpeed);
@@ -201,38 +208,46 @@ namespace Game {
             player->GetComponent<Rigidbody>()->ApplyForce(right * movementSpeed);
         }
         if (GetAsyncKeyState('H')) {
-            player->GetComponent<Rigidbody>()->position = Vec3(0, 1, 0);
+            player->GetComponent<Rigidbody>()->position = Vec3(0, 2, 0);
+        }
+        if (GetAsyncKeyState('E') && debug)
+        {
+            player->GetComponent<Rigidbody>()->position.y += 1 * movementSpeed * deltaTime;
+        }
+        if (GetAsyncKeyState('Q') && debug)
+        {
+            player->GetComponent<Rigidbody>()->position.y += -1 * movementSpeed * deltaTime;
+        }
+        if (GetAsyncKeyState('W') && debug)
+        {
+            player->GetComponent<Rigidbody>()->position += forward * movementSpeed * deltaTime;
+            
+        }
+        if (GetAsyncKeyState('S') && debug)
+        {
+            player->GetComponent<Rigidbody>()->position -= forward * movementSpeed * deltaTime;
         }
     }
 
 
     // takes care of setting up box colliders and collision callbacks
-    void UpdateColliders()
-    {
-        for (int i = 0; i < physicsObjects.size();i++)
-        {
+    void UpdateColliders() {
+        for (int i = 0; i < physicsObjects.size(); i++) {
             auto trans = physicsObjects[i]->GetComponent<Transform>();
             auto rigidbody = physicsObjects[i]->GetComponent<Rigidbody>();
-            if (trans != nullptr && rigidbody != nullptr)
-            {
-               
-                //std::cout << physicsObjects[i].GetTag() << std::endl;
+            if (trans != nullptr && rigidbody != nullptr) {
                 Vec3 minBounds = trans->pos - (trans->scale / 2);  // Calculate minimum bounds
                 Vec3 maxBounds = trans->pos + (trans->scale / 2);  // Calculate maximum bounds
                 rigidbody->SetColliderBounds(minBounds, maxBounds);  // Set collider bounds
-                
             }
-
         }
-
-        
-      // std::cout << "Colliders Set up!\n";
-
+       // std::cout << "Colliders Set up!\n";
     }
+
 
     void OnPlayerCube1Collision(const CollisionEvent callBack)
     {
-        std::cout << "Collision between player and cube1 detected!" << std::endl;
+        //std::cout << "Collision between player and cube1 detected!" << std::endl;
 
     }
     //setups up callbacks

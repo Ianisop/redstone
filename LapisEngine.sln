@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lapis-testing", "Lapis-testing.vcxproj", "{44AC18A1-F0D4-4A3B-8712-55B890673C8D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LapisEngine", "Lapis-testing.vcxproj", "{44AC18A1-F0D4-4A3B-8712-55B890673C8D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{382594CF-74A8-4D2D-B899-5D4D1AE67593}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
