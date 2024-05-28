@@ -1,9 +1,9 @@
 <h1 align="center">Lapis Engine</h1>
 
 <p align="center">
-  A project for learning and exploring 3d graphics development
+ Redstone
 </p>
 
 <p align="center">
-  <img width="360" src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/5/55/Block_of_Lapis_Lazuli_JE3_BE3.png/revision/latest/thumbnail/width/360/height/450?cb=20200315192953" alt="Lapis Lazuli Block From Minecraft">
+  <img width="360" src="[https://static.wikia.nocookie.net/minecraft_gamepedia/images/5/55/Block_of_Lapis_Lazuli_JE3_BE3.png/revision/latest/thumbnail/width/360/height/450?cb=20200315192953](https://www.google.com/url?sa=i&url=https%3A%2F%2Fminecraft.fandom.com%2Fwiki%2FBlock_of_Redstone&psig=AOvVaw0G8RsVGrYxXvoeVa3ovcg-&ust=1716984633309000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCMDboKuosIYDFQAAAAAdAAAAABAE)" alt="Buy faster internet you pooron">
 </p>
