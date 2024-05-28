@@ -1,7 +1,7 @@
 #include "LapisTypes.h"
-
+#include <random>
 #include "Helpers.h"
-
+#include "../ECS/Component.h"
 namespace Lapis
 {
 	////////////////////// Color
@@ -55,6 +55,18 @@ namespace Lapis
 			res.a = hex2f(hex + at);
 
 		return res;
+	}
+
+
+	Color& Color::operator=(const Color& other)
+	{
+		this->a = other.a;
+		this->b = other.b;
+		this->r = other.r;
+		this->g = other.g;
+		this->rgba = other.rgba;
+		return *this;
+
 	}
 
 	////////////////////// Vec2
@@ -123,6 +135,16 @@ namespace Lapis
 
 		return res;
 	}
+	Vec3 Vec3::operator-(const Vec3& other) const
+	{
+		Vec3 res;
+
+		res.x = x - other.x;
+		res.y = y - other.y;
+		res.z = z - other.z;
+
+		return res;
+	}
 
 	Vec3 Vec3::operator*(const float& scalar) const
 	{
@@ -131,6 +153,18 @@ namespace Lapis
 		res.x = x * scalar;
 		res.y = y * scalar;
 		res.z = z * scalar;
+
+		return res;
+	}
+
+
+	Vec3 Vec3::operator/(const float& scalar) const
+	{
+		Vec3 res;
+
+		res.x = x / scalar;
+		res.y = y / scalar;
+		res.z = z / scalar;
 
 		return res;
 	}
@@ -153,14 +187,67 @@ namespace Lapis
 		return *this;
 	}
 
-	void Vec3::Normalize()
+
+
+	float& Vec3::operator[](int index)
 	{
-		float magnitude = std::sqrt(x * x + y * y + z * z);
-		x /= magnitude;
-		y /= magnitude;
-		z /= magnitude;
+
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else throw std::out_of_range("Index out of range");
 	}
 
+	float Vec3::operator[](int index) const {
+		if (index == 0) return x;
+		else if (index == 1) return y;
+		else if (index == 2) return z;
+		else throw std::out_of_range("Index out of range");
+	}
+
+
+
+	float Vec3::Distance(Vec3 a, Vec3 b)
+	{
+		return sqrt(powf((b.x - a.x), 2) + powf((b.y - a.y), 2) + powf((b.z - a.z), 2));
+	}
+
+
+	float Vec3::Dot(Vec3 a, Vec3 b)
+	{
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
+
+	void Vec3::Normalize() {
+		float length = std::sqrt(x * x + y * y + z * z);
+		if (length != 0.0f) {
+			x /= length;
+			y /= length;
+			z /= length;
+		}
+	}
+
+	float Vec3::Magnitude()
+	{
+		return std::sqrt(powf(this->x, 2) + powf(this->y, 2) + powf(this->z, 2));
+	}
+
+	Vec3 Vec3::Cross(Vec3 a, Vec3 b) {
+		Vec3 result;
+		result.x = a.y * b.z - a.z * b.y;
+		result.y = a.z * b.x - a.x * b.z;
+		result.z = a.x * b.y - a.y * b.x;
+		return result;
+	}
+
+	float Vec3::Length() 
+	{
+		return std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+	}
+
+	Vec3 operator*(float scalar, const Vec3& vec) {
+		return Vec3(vec.x * scalar, vec.y * scalar, vec.z * scalar);
+	}
 	////////////////////// Vec4
 
 	Vec4 Lapis::Vec4::operator+(const Vec4& other) const
@@ -235,7 +322,7 @@ namespace Lapis
 	mat4x4 const mat4x4::Identity({ 1, 0, 0, 0 }, { 0,1,0,0 }, { 0,0,1,0 }, { 0,0,0,1 });
 
 	////////////////////// mat4x4
-	
+
 	Vec3 Transform::Forward()
 	{
 		Vec3 res;
@@ -253,7 +340,7 @@ namespace Lapis
 		res.x = cos((rot.yaw) * DEG2RAD);
 		res.y = 0;
 		res.z = sin((rot.yaw) * DEG2RAD);
-		
+
 		return res;
 	}
 	Vec3 Transform::Up()
@@ -267,25 +354,7 @@ namespace Lapis
 		return res;
 	}
 
-	Vec3 Transform::_Forward()
-	{
-		Vec3 res;
 
-		return res;
-	}
-
-	Vec3 Transform::_Right()
-	{
-		Vec3 res;
-
-		return res;
-	}
-
-	Vec3 Transform::_Up()
-	{
-		Vec3 res;
-
-		return res;
-	}
+	//transform
 
 }

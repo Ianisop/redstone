@@ -1,11 +1,14 @@
 #pragma once
-
 #include <Windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <memory>
 #include <string>
 #include <iostream>
+#include "../ECS/Component.h"
+#include <iomanip>
+#include <random>
+
 
 namespace Lapis
 {
@@ -56,6 +59,8 @@ namespace Lapis
 		operator DXGI_RGBA();
 
 		static Color hex2rgba(const char* hex);
+
+		Color& operator=(const Color& other);
 	};
 	//using Color = DXGI_RGBA;
 
@@ -82,7 +87,7 @@ namespace Lapis
 
 	};
 	using Vector2 = Vec2;
-
+	
 	struct Vec3
 	{
 		union {
@@ -99,11 +104,16 @@ namespace Lapis
 
 		Vec3 operator-() const;
 		Vec3 operator+(const Vec3& other) const;
+		Vec3 operator-(const Vec3& other) const;
 		Vec3 operator*(const float& scalar) const;
+
+		Vec3 operator/(const float& scalar) const;
 
 		Vec3& operator+=(const Vec3& other);
 		Vec3& operator-=(const Vec3& other);
-
+		float operator[](int index) const;
+		float& operator[](int index);
+		
 		friend std::ostream& operator<<(std::ostream& os, const Vec3& v3)
 		{
 			os << v3.x << '/' << v3.y << '/' << v3.z;
@@ -123,12 +133,15 @@ namespace Lapis
 			x(v2.x), y(v2.y), z(0)
 		{}
 
+		void Normalize();
+		float Magnitude();
+		float Length();
+		static float Distance(Vec3 a, Vec3 b);
+		static Vec3 Cross(Vec3 a, Vec3 b);
+		static float Dot(Vec3 a, Vec3 b);
 		static const Vec3 up;
 		static const Vec3 right;
 		static const Vec3 forward;
-
-		void Normalize();
-
 	};
 	using Vector3 = Vec3;
 
@@ -208,7 +221,7 @@ namespace Lapis
 		{}
 	};
 
-	struct Transform
+	struct Transform : public Component
 	{
 		union
 		{
@@ -224,17 +237,14 @@ namespace Lapis
 		{
 			Vec3 scale;
 		};
+
+
 		Transform() :
 			pos(0), rot(0), scale(1)
 		{}
 		Transform(Vec3 pos, Vec3 rot, Vec3 scale) :
 			pos(pos), rot(rot), scale(scale)
 		{}
-		
-		Vec3 _Forward();
-		Vec3 _Right();
-		Vec3 _Up();
-		
 		Vec3 Forward();
 		Vec3 Right();
 		Vec3 Up();

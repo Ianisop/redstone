@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Components.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="src\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="src\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -25,9 +27,13 @@
     <ClCompile Include="src\Lapis\LapisTypes.cpp" />
     <ClCompile Include="src\Lapis\Backend.cpp" />
     <ClCompile Include="src\utils\hsl-to-rgb.cpp" />
-    <ClCompile Include="src\WinMain.cpp" />
+    <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components.h" />
+    <ClInclude Include="Entity.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="src\ECS\Component.h" />
     <ClInclude Include="src\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="src\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
