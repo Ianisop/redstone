@@ -6,10 +6,11 @@
 #include <wingdi.h>
 #include <algorithm>
 #include <hidusage.h>
-
+#include <numeric> // For std::accumulate
+#include <deque>
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
-
+#include <iomanip> // Include this for std::setprecision and std::fixed
 
 // include chrono for time
 #include <chrono>
@@ -38,6 +39,9 @@
 #include "src/imgui/imgui.h"
 #include "src/imgui/backends/imgui_impl_win32.h"
 #include "src/imgui/backends/imgui_impl_dx11.h"
+
+#define MAX_FLOAT = 340282346638528859811704183484516925440.0000000000000000;
+bool SHOW_CURSOR = false;
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -119,8 +123,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     rid[0].hwndTarget = hwnd;
     RegisterRawInputDevices(rid, 1, sizeof(rid[0]));
 
-    float FPS_CAP = 60;
-    bool LIMIT_FPS = false;
+
+    constexpr float FPS_CAP = std::numeric_limits<float>::infinity(); // 60 by default
+
+    constexpr float FRAME_TIME_MS = 1000.0f / FPS_CAP;
+
+
+    auto lastTime = std::chrono::high_resolution_clock::now();
+
+    // To keep track of recent FPS values
+    std::deque<float> fpsHistory;
+    constexpr int FPS_HISTORY_SIZE = 60; // Number of frames to average for stable FPS
     MSG msg{};
     while (true && !GetAsyncKeyState(VK_ESCAPE))
     {
@@ -131,28 +144,64 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             if (msg.message == WM_QUIT)
                 break;
         }
-        
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::milli> deltaTime = currentTime - lastTime;
+
+        if (deltaTime.count() >= FRAME_TIME_MS)
+        {
+            lastTime = currentTime;
+
+            // Calculate the current FPS and store it in the history
+            float currentFps = 1000.0f / deltaTime.count();
+            fpsHistory.push_back(currentFps);
+
+            // Limit the history size to FPS_HISTORY_SIZE
+            if (fpsHistory.size() > FPS_HISTORY_SIZE)
+            {
+                fpsHistory.pop_front();
+            }
+
+            // Calculate the average FPS from the history
+            float averageFps = std::accumulate(fpsHistory.begin(), fpsHistory.end(), 0.0f) / fpsHistory.size();
+        }
+
+        // Calculate the average FPS from the history
+        float averageFps = std::accumulate(fpsHistory.begin(), fpsHistory.end(), 0.0f) / fpsHistory.size();
+
         // Run Lapis Frame
         {
             using namespace Lapis;
             NewFrame();
 
-            Draw::D2::String("yo", { 48,48 }, "ffffff", 12);
+            // Create a stringstream to format the average FPS value
+            std::stringstream fpsStream;
+            fpsStream << std::fixed << std::setprecision(0) << averageFps;
+            std::string fpsStringvalue = fpsStream.str();
+
+            const char* c = fpsStringvalue.c_str(); // c = char pointer
+            Draw::D2::String(c, { 5,5 }, "ff0000", 3);
+
+
+            if (GetAsyncKeyState('L') && 0x01)
+            {
+                SHOW_CURSOR = !SHOW_CURSOR;
+                std::cout << SHOW_CURSOR << "\n";
+            }
 
             RenderFrame();
             FlushFrame();
-
         }
-        Game::Run();
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Hello, world!");
-        ImGui::Text("Hello from another window!");
-        ImGui::End();
+        ImGui::Begin("Player");
 
+        ImGui::End();
         ImGui::Render();
+        Game::Run();
+
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
         Lapis::PresentFrame();
@@ -174,15 +223,19 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     Lapis::WndProcHandler(hwnd, msg, wParam, lParam);
-    
+
     switch (msg) {
     case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
         break;
 
+    case WM_LBUTTONDOWN:
+        SHOW_CURSOR = !SHOW_CURSOR;
+        std::cout << SHOW_CURSOR << "\n";
+        break;
+
     case WM_INPUT:
-       
         using namespace Lapis;
         UINT dwSize = sizeof(RAWINPUT);
         static BYTE lpb[sizeof(RAWINPUT)];
@@ -211,11 +264,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         //std::cout << std::format("{} x, {} y \n", xRot, yRot);
         mainCamera.rot = Vec3(yRot, xRot, 0);
 
-        SetCursorPos(p.x, p.y);
-        ShowCursor(false);
-
+        if(!SHOW_CURSOR)SetCursorPos(p.x, p.y);
+        ShowCursor(SHOW_CURSOR);
+        Game::Input();
         break;
-
+  
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
+
+
 }

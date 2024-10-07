@@ -8,6 +8,7 @@
 using namespace Lapis;
 namespace Game
 {
+   
     void Run();
     void InitializeObjects();
     void Blip();
