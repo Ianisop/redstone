@@ -43,6 +43,8 @@
 #define MAX_FLOAT = 340282346638528859811704183484516925440.0000000000000000;
 bool SHOW_CURSOR = false;
 
+
+
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -69,7 +71,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     // register the window class
     RegisterClassEx(&wc);
 
-    RECT wr = { 0, 0, 800, 600 };
+    RECT wr = { 0, 0, Lapis::SCREEN_HEIGHT, Lapis::SCREEN_WIDTH };
     HWND hwnd;
 
     // create the window and use the result as the handle

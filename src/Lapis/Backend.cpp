@@ -9,6 +9,13 @@
 
 namespace Lapis::Backend
 {
+    struct CullingBoundingBox
+    {
+        float minX, minY, minZ;
+        float maxX, maxY, maxZ; 
+    };
+
+
     ///////////////////////
     /*    EXTERN VARS    */
 
@@ -16,6 +23,7 @@ namespace Lapis::Backend
     std::chrono::steady_clock::duration deltaDuration{};
     std::chrono::steady_clock::duration initDuration{};
     std::unordered_map<std::string, std::shared_ptr<InternalMaterial>> builtinMaterials{};
+
 
     ///////////////////////
     /*  BACKEND GLOBALS  */
@@ -47,6 +55,17 @@ namespace Lapis::Backend
     int VertexVectorCapacity = 1000;
     std::vector<Vertex> LapisVertexVector{};
     std::vector<InternalLapisCommand> LapisCommandVector{};
+
+    // Tile dimensions (in pixels)
+    const int TILE_WIDTH = 50;
+    const int TILE_HEIGHT = 50;
+
+    // Number of tiles
+    const int TILES_X = SCREEN_WIDTH / TILE_WIDTH;
+    const int TILES_Y = SCREEN_HEIGHT / TILE_HEIGHT;
+
+    // Depth Estimation Buffer
+    std::vector<std::vector<float>> depthEstimationBuffer(TILES_Y, std::vector<float>(TILES_X, -std::numeric_limits<float>::infinity()));
 
     void InitBackend(IDXGISwapChain* _swapchain, HWND _hwnd)
     {
@@ -562,8 +581,43 @@ namespace Lapis::Backend
         }
 
         deviceContext->IASetPrimitiveTopology(internalLapisCommand.topology);
-        deviceContext->Draw(internalLapisCommand.vertexCount, internalLapisCommand.startVertexLocation);
+
+        
+       deviceContext->Draw(internalLapisCommand.vertexCount/2, internalLapisCommand.startVertexLocation); // draw call to gpu
     }
+
+
+
+    /// <summary>
+    /// returns true if object is occluded
+    /// </summary>
+    /// <param name="objectMatrix"></param>
+    /// <param name="camera"></param>
+    /// <returns></returns>
+    bool isOccluded(DirectX::XMMATRIX objectMatrix, Transform camera)
+    {
+
+        return false;
+    }
+
+    // Function to get the farthest z-value of an AABB (used to estimate depth)
+    float getFarthestZ(const CullingBoundingBox& box)
+    {
+        return box.maxZ;  // The farthest z-value is the maximum z of the bounding box
+    }
+
+    float getNearestZ(const CullingBoundingBox& box)
+    {
+        return box.minZ; // the nearest z-value is returend
+    }
+
+
+    bool isInCameraView(DirectX::XMMATRIX viewMatrix)
+    {
+        return false;
+    }
+
+
     void InitDefaultShaders()
     {
         {   

@@ -12,6 +12,8 @@ namespace Lapis
 	extern Transform mainCamera;
 	extern Vec4 clientRect;
 	
+	extern int SCREEN_WIDTH = 800;
+	extern int SCREEN_HEIGHT = 600;
 
 	void InitLapis(IDXGISwapChain* swapchain);
 	void InitLapis(HWND hwnd);

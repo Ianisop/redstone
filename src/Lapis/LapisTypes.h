@@ -237,13 +237,19 @@ namespace Lapis
 		{
 			Vec3 scale;
 		};
+		union
+		{
+			Vec3 center;
+
+		};
 
 
 		Transform() :
-			pos(0), rot(0), scale(1)
+			pos(0), rot(0), scale(1), center(scale/2)
 		{}
+
 		Transform(Vec3 pos, Vec3 rot, Vec3 scale) :
-			pos(pos), rot(rot), scale(scale)
+			pos(pos), rot(rot), scale(scale), center(scale/2)
 		{}
 		Vec3 Forward();
 		Vec3 Right();
